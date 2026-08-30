@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell($paths = @\\('C:\\\\xampp\\\\php\\\\php.exe','C:\\\\laragon\\\\bin\\\\php\\\\php-8.2\\\\php.exe','C:\\\\Program Files\\\\PHP\\\\php.exe'\\); foreach \\($p in $paths\\) { if \\(Test-Path $p\\) { Write-Output \"FOUND: $p\" } }; Get-ChildItem -Path 'C:\\\\' -Filter 'php.exe' -Recurse -ErrorAction SilentlyContinue -Depth 3 | Select-Object -First 10 FullName)",
+      "Read(//c//**)",
+      "Bash(grep -o 'templater.js.\\\\{0,2500\\\\}' \"d:/projects/kidoo/public/assets/admin/vendors/list.js/list.min.js\")",
+      "Bash(python3 -c ' *)",
+      "Bash(grep -o '\"\\\\./src/templater\\\\.js\".\\\\{0,2500\\\\}' \"d:/projects/kidoo/public/assets/admin/vendors/list.js/list.min.js\")",
+      "Bash(xargs grep -l \"class Student\")",
+      "Bash(xargs grep -l \"class ClassRoom\\\\|class ClassModel\\\\|extends Model\")",
+      "Bash(where.exe php *)",
+      "Bash(where.exe mysql *)",
+      "PowerShell(Get-Command mysql -ErrorAction SilentlyContinue)",
+      "PowerShell(php -v 2>&1)",
+      "PowerShell(php artisan config:clear)"
+    ]
+  }
+}

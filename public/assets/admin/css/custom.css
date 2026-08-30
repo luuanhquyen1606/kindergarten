@@ -1,0 +1,23 @@
+.ql-editor{
+    background-color: #fff !important;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-color: #ccc;
+}
+.quill_editor {
+border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-color: #ccc;
+}
+.ql-toolbar{
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-color: #ccc;
+}
+.ql-buttonForm::before {
+  content: "🔗";
+}
+
+.ql-align-center{
+text-align: center;
+}
