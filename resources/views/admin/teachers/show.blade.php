@@ -32,6 +32,10 @@
               <p class="fw-semibold">{{ $teacher->school_email ?? '-' }}</p>
             </div>
             <div class="col-sm-6">
+              <p class="text-body-tertiary mb-1">Cơ sở</p>
+              <p class="fw-semibold">{{ $teacher->campus_name ?? '-' }}</p>
+            </div>
+            <div class="col-sm-6">
               <p class="text-body-tertiary mb-1">Ngày sinh</p>
               <p class="fw-semibold">{{ $teacher->birthday ? \Illuminate\Support\Carbon::parse($teacher->birthday)->format('d/m/Y') : '-' }}</p>
             </div>

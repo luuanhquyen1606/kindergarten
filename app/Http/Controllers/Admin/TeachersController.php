@@ -28,7 +28,8 @@ class TeachersController extends BaseController
          $teacher = DB::table('users')
         ->leftJoin('files','files.id','users.photo_id')
         ->leftJoin('thumbnails','thumbnails.file_id','files.id')
-        ->select('users.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path')
+        ->leftJoin('campuses','campuses.id','users.campus_id')
+        ->select('users.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path', 'campuses.name as campus_name')
         ->where('users.school_id', $this->app['school']->id)
         ->whereNull('users.deleted_at')
         ->where('users.id', $id)
@@ -95,7 +96,7 @@ class TeachersController extends BaseController
         });
        
         $data['permission_groups']=$permission_groups;
- 
+
 
         $teacher = DB::table('users')
         ->leftJoin('files','files.id','users.photo_id')
@@ -105,8 +106,16 @@ class TeachersController extends BaseController
         ->whereNull('users.deleted_at')
         ->orderBy('users.created_at', 'desc')
         ->where('users.id', $id)
-        ->first();  
-        $data['teacher']=$teacher; 
+        ->first();
+        $data['teacher']=$teacher;
+
+        $campuses = DB::table('campuses')
+        ->where('school_id', $this->app['school']->id)
+        ->whereNull('deleted_at')
+        ->orderBy('name')
+        ->get();
+        $data['campuses']=$campuses;
+
         return view('admin.teachers.edit',$data);
     }
     public function update($id,Request $request){
@@ -125,6 +134,7 @@ class TeachersController extends BaseController
         ],
         'address'=> 'required',
         'birthday' => 'nullable|date',
+        'campus_id' => 'nullable|exists:campuses,id',
         'email' => [
             'required',
             'email',
@@ -164,6 +174,7 @@ class TeachersController extends BaseController
                 'phone' => $request->get('phone'),
                 'address'=> $request->get('address'),
                 'birthday'=> $request->get('birthday'),
+                'campus_id' => $request->get('campus_id') ?: null,
                 'about'=> $request->get('about'),
                 'email'=> $request->get('email'),
                 'school_email'=> $school_email,
@@ -239,7 +250,14 @@ class TeachersController extends BaseController
 
         $data['permission_groups']=$permission_groups;
         $data['password']=Str::random(8);;
-   
+
+        $campuses = DB::table('campuses')
+        ->where('school_id', $this->app['school']->id)
+        ->whereNull('deleted_at')
+        ->orderBy('name')
+        ->get();
+        $data['campuses']=$campuses;
+
         return view('admin.teachers.create',$data);
     } 
     public function store(Request $request){
@@ -254,6 +272,7 @@ class TeachersController extends BaseController
         'phone' => 'required|digits_between:10,11|unique:users',
         'address'=> 'required',
         'birthday' => 'nullable|date',
+        'campus_id' => 'nullable|exists:campuses,id',
         'email'=> 'required|email|unique:users',
         'password'=> 'required|min:8',
         'school_email_alias' => [
@@ -288,6 +307,7 @@ class TeachersController extends BaseController
         'email' => $request->get('email'),
         'address' => $request->get('address'),
         'birthday' => $request->get('birthday'),
+        'campus_id' => $request->get('campus_id') ?: null,
         'phone' => $request->get('phone'),
         'photo_id' => $request->get('photo_id'),
         'school_email' => $request->get('school_email'),

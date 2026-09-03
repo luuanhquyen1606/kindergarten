@@ -68,7 +68,25 @@
                   <div class="invalid-feedback"></div>
                   </div>
                 </div>
-              <div class="col-sm-12 col-md-12"> 
+
+              <div class="col-sm-12 col-md-12" style="margin-bottom: 10px;">
+                <div class="form-floating">
+                  <select name="campus_id" class="form-select" id="campus_select">
+                    <option value="">Chọn cơ sở</option>
+                    <?php
+                    foreach ($campuses as $campus)
+                    {
+                    ?>
+                    <option <?php echo ($campus->id==$teacher->campus_id)? 'selected':''; ?> value="<?php echo $campus->id;?>"><?php echo $campus->name; ?></option>
+                    <?php
+                    }
+                    ?>
+                  </select>
+                  <label for="campus_select">Cơ sở</label>
+                  <div class="invalid-feedback"></div>
+                </div>
+              </div>
+              <div class="col-sm-12 col-md-12">
                 <div class="form-floating">
                     <div class="quill_editor" for="post_content" id="editor_post_content"></div>
                     <input id="post_content" type="hidden" name="about" value="{{ $teacher->about }}">  

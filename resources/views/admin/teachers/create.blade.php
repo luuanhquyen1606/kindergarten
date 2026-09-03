@@ -46,6 +46,24 @@
                   </div>
                 </div>
 
+              <div class="col-sm-12 col-md-12" style="margin-bottom: 10px;">
+                <div class="form-floating">
+                  <select name="campus_id" class="form-select" id="campus_select">
+                    <option value="" selected>Chọn cơ sở</option>
+                    <?php
+                    foreach ($campuses as $campus)
+                    {
+                    ?>
+                    <option value="<?php echo $campus->id;?>"><?php echo $campus->name; ?></option>
+                    <?php
+                    }
+                    ?>
+                  </select>
+                  <label for="campus_select">Cơ sở</label>
+                  <div class="invalid-feedback"></div>
+                </div>
+              </div>
+
                <div class="col-sm-12 col-md-12" style="margin-bottom: 10px;">
                  <div class="form-floating">
                   <input class="form-control" name="email" id="floatingInputGrid" type="text" placeholder="Project title">
