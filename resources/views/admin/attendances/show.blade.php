@@ -5,7 +5,7 @@
   <div class="row g-3 flex-between-end mb-5" style="padding-top:0px !important">
     <div class="col-auto">
       <a href="{{ route('attendances.index') }}" class="fw-semibold fs-9"><span class="fas fa-angle-left me-1"></span>Điểm danh</a>
-      <h2 class="mb-2">{{ $class->name }}</h2>
+      <h2 class="mb-2"><a href="{{ route('classes.show', $class->id) }}" class="text-body-emphasis">{{ $class->name }}</a></h2>
     </div>
   </div>
 
