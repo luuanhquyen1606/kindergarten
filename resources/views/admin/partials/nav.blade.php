@@ -215,7 +215,7 @@
          
           <li class="nav-item dropdown"><a class="nav-link lh-1 pe-0" id="navbarDropdownUser" href="#!" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-haspopup="true" aria-expanded="false">
               <div class="avatar avatar-l ">
-                <img class="rounded-circle " src="<?php echo (isset($currentUser->thumbnail_path))? $currentUser->thumbnail_path:'/assets/admin/img/team/40x40/avatar.webp'; ?>" alt="" />
+                <img class="rounded-circle " src="<?php echo (isset($currentUser->photo_id))? getPhotoUrl($currentUser->photo_id):'/assets/admin/img/team/40x40/avatar.webp'; ?>" alt="" />
               </div>
             </a>
             <div class="dropdown-menu dropdown-menu-end navbar-dropdown-caret py-0 dropdown-profile shadow border" aria-labelledby="navbarDropdownUser">
@@ -223,9 +223,9 @@
                 <div class="card-body p-0">
                   <div class="text-center pt-4 pb-3">
                     <div class="avatar avatar-xl ">
-                      <img class="rounded-circle " src="<?php echo (isset($currentUser->thumbnail_path))? $currentUser->thumbnail_path:'/assets/admin/img/team/40x40/avatar.webp'; ?>" alt="" />
+                      <img class="rounded-circle " src="<?php echo (isset($currentUser->photo_id))? getPhotoUrl($currentUser->photo_id):'/assets/admin/img/team/40x40/avatar.webp'; ?>" alt="" />
                     </div>
-                    <h6 class="mt-2 text-body-emphasis">{{ $currentUser->name }}</h6>
+                    <h6 class="mt-2 text-body-emphasis">{{ $currentUser->name }}</h6>           
                   </div>
                   <div class="mb-3 mx-3"><input class="form-control form-control-sm" id="statusUpdateInput" type="text" placeholder="Update your status" /></div>
                 </div>
