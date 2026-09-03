@@ -73,7 +73,12 @@ class ClassesController extends BaseController
         $data['students'] = $students;
         $data['today'] = $today;
         $data['present_count'] = $students->filter(fn($s) => $s->attendance_status == 'present')->count();
+        $data['absent_count'] = $students->filter(fn($s) => $s->attendance_status == 'absent')->count();
+        $data['late_count'] = $students->filter(fn($s) => $s->attendance_status == 'late')->count();
+        $data['excused_count'] = $students->filter(fn($s) => $s->attendance_status == 'excused')->count();
+        $data['unmarked_count'] = $students->filter(fn($s) => in_array($s->attendance_status, ['unmarked', null]))->count();
         $data['unpaid_count'] = $students->filter(fn($s) => $s->has_unpaid_tuition)->count();
+        $data['attendance_taken_today'] = $students->isNotEmpty() && $students->every(fn($s) => !is_null($s->attendance_status));
 
         return view('admin.classes.show', $data);
     }
