@@ -21,8 +21,77 @@ class SettingsController extends BaseController
         $themes = DB::table(table: 'themes')
         ->get();      
         $data['themes']=$themes; 
+        $data['campuses'] = DB::table('campuses')
+        ->where('school_id', $this->app['school']->id)
+        ->whereNull('deleted_at')
+        ->orderBy('name')
+        ->get();
         return view('admin.settings.index',$data); 
     }  
+
+    public function storeCampus(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|min:2|max:255',
+            'address' => 'nullable|string|max:256',
+            'phone' => 'nullable|string|max:100',
+            'email' => 'nullable|email|max:100',
+            'google_map' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        DB::table('campuses')->insert([
+            'school_id' => $this->app['school']->id,
+            'name' => trim($request->input('name')),
+            'address' => trim($request->input('address', '')),
+            'phone' => trim($request->input('phone', '')),
+            'email' => trim($request->input('email', '')),
+            'google_map' => $request->input('google_map'),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->route('settings.index')->with('success', 'Campus created successfully.');
+    }
+
+    public function updateCampus($id, Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|min:2|max:255',
+            'address' => 'nullable|string|max:256',
+            'phone' => 'nullable|string|max:100',
+            'email' => 'nullable|email|max:100',
+            'google_map' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        DB::table('campuses')
+            ->where('id', $id)
+            ->where('school_id', $this->app['school']->id)
+            ->whereNull('deleted_at')
+            ->update([
+                'name' => trim($request->input('name')),
+                'address' => trim($request->input('address', '')),
+                'phone' => trim($request->input('phone', '')),
+                'email' => trim($request->input('email', '')),
+                'google_map' => $request->input('google_map'),
+                'updated_at' => now(),
+            ]);
+
+        return redirect()->route('settings.index')->with('success', 'Campus updated successfully.');
+    }
     public function show($id)
     {
          $teacher = DB::table('users')

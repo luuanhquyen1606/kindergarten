@@ -159,6 +159,79 @@
               </div>
 
 
+              <div class="col-sm-12 col-md-12">
+                <div class="card mt-5">
+                  <div class="card-body pt-0">
+                    <div class="myfiles-action-bar mx-n4 mb-4 d-flex align-items-center justify-content-between">
+                      <h6 class="mb-0 text-body-tertiary">Cơ sở</h6>
+                      <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#campus_create_canvas">
+                        <span class="fas fa-plus me-1"></span>Thêm cơ sở
+                      </button>
+                    </div>
+                    @if($campuses->isEmpty())
+                      <p class="mb-0 text-body-tertiary">Chưa có cơ sở nào.</p>
+                    @else
+                      <div class="table-responsive">
+                        <table class="table table-sm fs-9 mb-0">
+                          <thead>
+                            <tr>
+                              <th>Tên cơ sở</th>
+                              <th>Địa chỉ</th>
+                              <th>Điện thoại</th>
+                              <th class="text-end">Tác vụ</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @foreach($campuses as $campus)
+                              <tr>
+                                <td class="fw-semibold">{{ $campus->name }}</td>
+                                <td>{{ $campus->address ?: '-' }}</td>
+                                <td>{{ $campus->phone ?: '-' }}</td>
+                                <td class="text-end">
+                                  <button class="btn btn-link text-body p-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#campus_edit_{{ $campus->id }}" aria-label="Chỉnh sửa {{ $campus->name }}">
+                                    <span class="fas fa-edit"></span>
+                                  </button>
+                                </td>
+                              </tr>
+                            @endforeach
+                          </tbody>
+                        </table>
+                      </div>
+                    @endif
+                  </div>
+                </div>
+              </div>
+
+              <div class="offcanvas offcanvas-end" id="campus_create_canvas" tabindex="-1" aria-labelledby="campus_create_label">
+                <div class="offcanvas-header">
+                  <h5 id="campus_create_label">Thêm cơ sở</h5>
+                  <button class="btn-close" type="button" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                  <form class="ajax_form" action="{{ route('settings.campuses.store') }}" method="POST">
+                    @csrf
+                    @include('admin.settings.campus-form', ['campus' => null, 'submitLabel' => 'Tạo cơ sở'])
+                  </form>
+                </div>
+              </div>
+
+              @foreach($campuses as $campus)
+                <div class="offcanvas offcanvas-end" id="campus_edit_{{ $campus->id }}" tabindex="-1" aria-labelledby="campus_edit_label_{{ $campus->id }}">
+                  <div class="offcanvas-header">
+                    <h5 id="campus_edit_label_{{ $campus->id }}">Cập nhật cơ sở</h5>
+                    <button class="btn-close" type="button" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                  </div>
+                  <div class="offcanvas-body">
+                    <form class="ajax_form" action="{{ route('settings.campuses.update', $campus->id) }}" method="POST">
+                      @csrf
+                      @method('PUT')
+                      @include('admin.settings.campus-form', ['campus' => $campus, 'submitLabel' => 'Cập nhật'])
+                    </form>
+                  </div>
+                </div>
+              @endforeach
+
+
 
 
 

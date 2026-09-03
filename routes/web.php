@@ -72,6 +72,8 @@ Route::middleware([
     Route::resource('/admin/blocks', BlocksController::class)->only(['index', 'show', 'create', 'store', 'destroy','edit','update']);
     Route::resource('/admin/page_blocks', PageBlocksController::class)->only(['index', 'show', 'create', 'store', 'destroy','edit','update']);
     Route::resource('/admin/interface', InterfaceController::class)->only(['index', 'show', 'create', 'store', 'destroy','edit','update']);
+    Route::post('/admin/settings/campuses', [SettingsController::class, 'storeCampus'])->name('settings.campuses.store');
+    Route::put('/admin/settings/campuses/{id}', [SettingsController::class, 'updateCampus'])->whereNumber('id')->name('settings.campuses.update');
     Route::resource('/admin/settings', SettingsController::class)->only(['index', 'show', 'create', 'store', 'destroy','edit','update']);
     Route::resource('/admin/navigations', NavigationsController::class)->only(['index', 'show', 'create', 'store', 'destroy','edit','update']);
     Route::resource('/admin/categories', CategoriesController::class)->only(['index', 'show', 'create', 'store', 'destroy','edit','update']);
