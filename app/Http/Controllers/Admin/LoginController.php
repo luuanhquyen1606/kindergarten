@@ -28,12 +28,13 @@ class LoginController extends Controller
         ->where('phone',$request->phone)
         ->first();
         if (!$user) {
-            die("a");
         return back()->withErrors(['phone' => 'Số điện thoại không tồn tại']);
+        }
+        if ($user->deleted_at) {
+        return back()->withErrors(['phone' => 'Tài khoản đã bị khóa']);
         }
  
         if (!Hash::check($request->password, $user->password)) {
-            die("b");
         return back()->withErrors(['password' => 'Incorrect password.']);
         }
         $user = User::where('phone', $request->phone)->first();

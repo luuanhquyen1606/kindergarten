@@ -130,6 +130,10 @@
               <span class="fw-semibold">{{ $class->program_name ?? '—' }}</span>
             </li>
             <li class="d-flex justify-content-between py-2 border-bottom border-translucent">
+              <span class="text-body-tertiary">Cơ sở</span>
+              <span class="fw-semibold">{{ $class->campus_name ?? '—' }}</span>
+            </li>
+            <li class="d-flex justify-content-between py-2 border-bottom border-translucent">
               <span class="text-body-tertiary">Năm học</span>
               <span class="fw-semibold">{{ $class->year ?? '—' }}</span>
             </li>

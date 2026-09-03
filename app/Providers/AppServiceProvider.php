@@ -33,13 +33,12 @@ class AppServiceProvider extends ServiceProvider
         View::composer('admin.partials.nav', function ($view) {
 
             $user = DB::table('users')
-            ->leftJoin('files','files.id','users.photo_id')
-            ->leftJoin('thumbnails','thumbnails.file_id','files.id')
-            ->select('users.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path')
+            ->select('users.*')
             ->where('users.id', Auth::user()->id)
             ->whereNull('users.deleted_at')
             ->orderBy('users.created_at', 'desc')
             ->first(); 
+            
         
             $view->with('currentUser', $user);
         });

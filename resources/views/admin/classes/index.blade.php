@@ -38,8 +38,9 @@
                         <div class="form-check mb-0 fs-8"><input class="form-check-input" id="checkbox-bulk-customers-select" type="checkbox" data-bulk-select='{"body":"customers-table-body"}' /></div>
                       </th>
                       <th class="sort align-middle pe-5" scope="col" data-sort="customer" style="width:40%;">Tiêu đề</th>
-                      <th class="sort align-middle pe-5" scope="col" data-sort="email" style="width:20%;">Chương trình học</th>   
-                      <th class="sort align-middle pe-5" scope="col" data-sort="email" style="width:20%;">Năm học</th>         
+                      <th class="sort align-middle pe-5" scope="col" data-sort="email" style="width:20%;">Chương trình học</th>
+                      <th class="sort align-middle pe-5" scope="col" data-sort="email" style="width:20%;">Cơ sở</th>
+                      <th class="sort align-middle pe-5" scope="col" data-sort="email" style="width:20%;">Năm học</th>
                       <th class="sort align-middle text-end pe-3" scope="col"  style="min-width:100px">tác vụ</th>
                       
                     </tr>
@@ -61,6 +62,7 @@
                           <p class="mb-0 ms-3 text-body-emphasis fw-bold"><?php echo $class->name; ?></p>
                         </a></td>
                       <td class="email align-middle white-space-nowrap pe-5"><?php echo $class->program_name; ?></td>
+                      <td class="email align-middle white-space-nowrap pe-5"><?php echo $class->campus_name ?? '—'; ?></td>
                       <td class="email align-middle white-space-nowrap pe-5"><?php echo $class->year; ?></td>
 
                       <td class="align-middle actions  text-end pe-3">

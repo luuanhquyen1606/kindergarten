@@ -13,7 +13,8 @@ class ClassesController extends BaseController
         ->leftJoin('files','files.id','classes.photo_id')
         ->leftJoin('thumbnails','thumbnails.file_id','files.id')
         ->leftJoin('programs','programs.id','classes.program_id')
-        ->select('classes.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path', 'programs.name as program_name')
+        ->leftJoin('campuses','campuses.id','classes.campus_id')
+        ->select('classes.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path', 'programs.name as program_name', 'campuses.name as campus_name')
         ->where('classes.school_id', $this->app['school']->id)
         ->whereNull('classes.deleted_at')
         ->orderBy('classes.created_at', 'desc')
@@ -30,8 +31,9 @@ class ClassesController extends BaseController
         ->leftJoin('thumbnails', 'thumbnails.file_id', 'files.id')
         ->leftJoin('programs', 'programs.id', 'classes.program_id')
         ->leftJoin('users', 'users.id', 'classes.teacher_id')
+        ->leftJoin('campuses', 'campuses.id', 'classes.campus_id')
         ->select('classes.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path',
-            'programs.name as program_name', 'users.name as teacher_name')
+            'programs.name as program_name', 'users.name as teacher_name', 'campuses.name as campus_name')
         ->where('classes.school_id', $school_id)
         ->where('classes.id', $id)
         ->whereNull('classes.deleted_at')
@@ -93,20 +95,29 @@ class ClassesController extends BaseController
         ->where('programs.school_id', $this->app['school']->id)
         ->whereNull('programs.deleted_at')
         ->get();
-        $data['programs']=$programs; 
+        $data['programs']=$programs;
         $teachers = DB::table('users')
         ->where('school_id', $this->app['school']->id)
         ->get();
-        $data['teachers']=$teachers; 
+        $data['teachers']=$teachers;
+
+        $campuses = DB::table('campuses')
+        ->where('school_id', $this->app['school']->id)
+        ->whereNull('deleted_at')
+        ->orderBy('name')
+        ->get();
+        $data['campuses']=$campuses;
+
         return view('admin.classes.edit',$data);
     }
     public function update($id,Request $request){
-        
+
         DB::table('classes')
         ->where('id', $id)
         ->update([
         'name' => $request->get('name'),
         'program_id' => $request->get('program_id'),
+        'campus_id' => $request->get('campus_id') ?: null,
         'photo_id' => $request->get('photo_id'),
         'teacher_id' => $request->get('teacher_id'),
         'year' => $request->get('year'),
@@ -134,18 +145,24 @@ class ClassesController extends BaseController
         $teachers = DB::table('users')
         ->where('school_id', $this->app['school']->id)
         ->get();
-        $data['teachers']=$teachers;  
+        $data['teachers']=$teachers;
 
-
+        $campuses = DB::table('campuses')
+        ->where('school_id', $this->app['school']->id)
+        ->whereNull('deleted_at')
+        ->orderBy('name')
+        ->get();
+        $data['campuses']=$campuses;
 
         return view('admin.classes.create',$data);
-    } 
+    }
     public function store(Request $request){
-  
+
          $validator = Validator::make($request->all(), [
         'name' => 'required|min:5',
         'photo_id' => 'required', // example
         'program_id' => 'required',
+        'campus_id' => 'nullable|exists:campuses,id',
         'year' => 'required','integer','min:' . (now()->year - 5),'max:' . (now()->year + 5),
         'tuition' => 'required|numeric|min:0',
         'teacher_id' => 'required'
@@ -161,6 +178,7 @@ class ClassesController extends BaseController
         $post_id=DB::table('classes')->insertGetId([
         'name' => $request->get('name'),
         'program_id' => $request->get('program_id'),
+        'campus_id' => $request->get('campus_id') ?: null,
         'school_id' => $this->app['school']->id,
         'teacher_id' => $request->get('teacher_id'),
         'photo_id' => $request->get('photo_id'),
