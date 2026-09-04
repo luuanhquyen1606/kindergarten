@@ -80,6 +80,17 @@ class ClassesController extends BaseController
         ->orderBy('posts.created_at', 'desc')
         ->get();
 
+        $postPhotos = DB::table('post_files')
+        ->join('files', 'files.id', 'post_files.file_id')
+        ->whereIn('post_files.post_id', $posts->pluck('id'))
+        ->select('post_files.post_id', 'files.id', 'files.path')
+        ->get()
+        ->groupBy('post_id');
+
+        foreach ($posts as $post) {
+            $post->photos = $postPhotos->get($post->id, collect());
+        }
+
         $data['class'] = $class;
         $data['students'] = $students;
         $data['posts'] = $posts;
@@ -225,7 +236,8 @@ class ClassesController extends BaseController
 
         $validator = Validator::make($request->all(), [
             'content' => 'required|string',
-            'photo_id' => 'nullable|exists:files,id',
+            'files' => 'nullable|array',
+            'files.*' => 'nullable|exists:files,id',
         ]);
 
         if ($validator->fails()) {
@@ -241,7 +253,6 @@ class ClassesController extends BaseController
             'type' => 'class_update',
             'title' => $title !== '' ? $title : 'Cập nhật lớp học',
             'content' => $request->get('content'),
-            'photo_id' => $request->get('photo_id') ?: null,
             'school_id' => $school_id,
             'user_id' => Auth::id(),
             'created_at' => now(),
@@ -252,6 +263,20 @@ class ClassesController extends BaseController
             'class_id' => $class->id,
             'post_id' => $post_id,
         ]);
+
+        if ($request->get('files')) {
+            foreach ($request->get('files') as $fileId) {
+                if ($fileId) {
+                    DB::table('post_files')->insertOrIgnore([
+                        'post_id' => $post_id,
+                        'file_id' => $fileId,
+                        'school_id' => $school_id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+        }
 
         if ($request->ajax()) {
             return response()->json(['status' => 'ok']);

@@ -125,8 +125,16 @@
                       </div>
                     </div>
                     <p class="text-body-secondary mb-3" style="white-space: pre-line;">{{ $post->content }}</p>
-                    @if($post->photo_id)
-                    <img class="rounded w-100" src="{{ getPhotoUrl($post->photo_id) }}" alt="">
+                    @if($post->photos->isNotEmpty())
+                    <div class="row g-1">
+                      @foreach($post->photos as $photo)
+                      <div class="{{ $post->photos->count() === 1 ? 'col-12' : ($post->photos->count() === 2 ? 'col-6' : 'col-4') }}">
+                        <a href="{{ $photo->path }}" data-gallery="gallery-class-post-{{ $post->id }}">
+                          <img class="rounded w-100 h-100" style="object-fit: cover; aspect-ratio: 1 / 1;" src="{{ $photo->path }}" alt="">
+                        </a>
+                      </div>
+                      @endforeach
+                    </div>
                     @endif
                   </div>
                 </div>
@@ -164,16 +172,14 @@
                     <div class="invalid-feedback"></div>
                   </div>
 
-                  <div id="class_post_photo_preview" class="mb-3" style="display:none;">
-                    <img id="class_post_photo_preview_img" class="rounded w-100" src="" alt="">
-                  </div>
-
-                  <input type="hidden" name="photo_id" id="class_post_photo_id" value="">
+                  <div id="class_post_photos_preview" class="row g-2 mb-3"></div>
+                  <div id="class_post_files_inputs"></div>
 
                   <label class="btn btn-phoenix-secondary mb-0" for="class_post_photo_input">
                     <span class="fas fa-image me-2"></span>Thêm ảnh
                   </label>
-                  <input type="file" id="class_post_photo_input" accept="image/*" class="d-none">
+                  <input type="file" id="class_post_photo_input" accept="image/*" multiple class="d-none">
+                  <div id="class_post_upload_status" class="fs-10 text-body-tertiary mt-2"></div>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-phoenix-secondary" data-bs-dismiss="modal">Hủy</button>
@@ -188,12 +194,11 @@
 
 @section('js')
 <script type="text/javascript">
-$('#class_post_photo_input').on('change', function () {
-    var file = this.files[0];
-    if (!file) return;
-
+function uploadClassPostPhoto(file) {
     var formData = new FormData();
     formData.append('file', file);
+
+    $('#class_post_upload_status').text('Đang tải ảnh lên...');
 
     $.ajax({
         url: "{{ route('file_upload') }}",
@@ -202,11 +207,42 @@ $('#class_post_photo_input').on('change', function () {
         processData: false,
         contentType: false,
         success: function (res) {
-            $('#class_post_photo_id').val(res.id);
-            $('#class_post_photo_preview_img').attr('src', res.path);
-            $('#class_post_photo_preview').show();
+            $('#class_post_files_inputs').append('<input type="hidden" name="files[]" value="' + res.id + '">');
+            $('#class_post_photos_preview').append(
+                '<div class="col-4 position-relative" data-file-id="' + res.id + '">' +
+                    '<img class="rounded w-100" style="height:90px;object-fit:cover" src="' + res.path + '" alt="">' +
+                    '<button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 remove-class-post-photo" style="padding:2px 6px;"><span class="fas fa-times"></span></button>' +
+                '</div>'
+            );
+        },
+        complete: function () {
+            $('#class_post_upload_status').text('');
         }
     });
+}
+
+$('#class_post_photo_input').on('change', function () {
+    var files = this.files;
+    for (var i = 0; i < files.length; i++) {
+        uploadClassPostPhoto(files[i]);
+    }
+    $(this).val('');
+});
+
+$(document).on('click', '.remove-class-post-photo', function () {
+    var $col = $(this).closest('[data-file-id]');
+    var fileId = $col.data('file-id');
+    $('#class_post_files_inputs input[value="' + fileId + '"]').remove();
+    $col.remove();
+});
+
+$('#create_class_post_modal').on('hidden.bs.modal', function () {
+    $('#create_class_post_form')[0].reset();
+    $('#class_post_photos_preview').empty();
+    $('#class_post_files_inputs').empty();
+    $('#class_post_upload_status').text('');
+    $('.invalid-feedback').html('');
+    $('#create_class_post_form .form-control').removeClass('is-invalid');
 });
 
 $('#create_class_post_form').on('submit', function (e) {
