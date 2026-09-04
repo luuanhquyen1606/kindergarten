@@ -20,16 +20,13 @@
               <div class="row justify-content-xl-between">
                 <div class="col-auto">
                   <div class="d-flex flex-wrap mb-3 align-items-center">
-                    <h2 class="me-2">Erza Bridgest</h2><span class="fw-semibold fs-7 text-body-emphasis">u/hansolo</span>
+                    <h2 class="me-2">{{ $class->name }}</h2><span class="fw-semibold fs-7 text-body-emphasis">{{ $class->year }}</span>
                   </div>
                   <div class="mb-5">
                     <div class="d-md-flex align-items-center">
-                      <div class="d-flex align-items-center"><span class="fa-solid fa-user-group fs-9 text-body-tertiary me-2 me-lg-1 me-xl-2"></span><a class="text-body-emphasis" href="#!"><span class="fs-7 fw-bold text-body-tertiary text-opacity-85 text-body-emphasis-hover">1297 <span class="fw-semibold ms-1 me-4">Followers</span></span></a></div>
-                      <div class="d-flex align-items-center"><span class="fa-solid fa-user-check fs-9 text-body-tertiary me-2 me-lg-1 me-xl-2"></span><a class="text-body-emphasis" href="#!"><span class="fs-7 fw-bold text-body-tertiary text-opacity-85 text-body-emphasis-hover">3971 <span class="fw-semibold ms-1 me-4">Following</span></span></a></div>
-                      <div class="d-flex align-items-center"><span class="fa-solid fa-location-dot fs-9 text-body-tertiary me-2 me-lg-1 me-xl-2"></span><a class="text-body-emphasis" href="#!"><span class="fs-7 fw-semibold text-body-tertiary text-opacity-85 text-body-emphasis-hover">Vancouver, Lothal</span></a></div>
+                      <div class="d-flex align-items-center"><span class="fa-solid fa-user-group fs-9 text-body-tertiary me-2 me-lg-1 me-xl-2"></span><a class="text-body-emphasis" href="#!"><span class="fs-7 fw-bold text-body-tertiary text-opacity-85 text-body-emphasis-hover">{{ $students->count() }} <span class="fw-semibold ms-1 me-4">học sinh</span></span></a></div>
                     </div>
                   </div>
-                  <p class="fs-6 text-body-secondary">“Whenever you find yourself on the side of the majority, it is time to pause and reflect.”</p>
                 </div>
                 <div class="col-auto">
                   <div class="row g-2">
@@ -61,15 +58,15 @@
               </div>
               <div class="mb-8">
                 <div class="d-flex pb-4 align-items-end">
-                  <h3 class="flex-1 mb-0">Photos</h3><a class="fw-bold fs-9 me-4" href="#!">Albums</a><a class="fw-bold fs-9" href="#!">See all</a>
+      
+                  <h3 class="flex-1 mb-0">Album</h3><a class="">tất cả</a>
                 </div>
                 <div class="row g-3">
-                  <div class="col-4"><a href="/assets/admin/img/gallery/11.png" data-gallery="gallery-photos"><img class="w-100 rounded-3" src="/assets/admin/img/gallery/11.png" alt=""></a></div>
-                  <div class="col-4"><a href="/assets/admin/img/gallery/12.png" data-gallery="gallery-photos"><img class="w-100 rounded-3" src="/assets/admin/img/gallery/12.png" alt=""></a></div>
-                  <div class="col-4"><a href="/assets/admin/img/gallery/13.png" data-gallery="gallery-photos"><img class="w-100 rounded-3" src="/assets/admin/img/gallery/13.png" alt=""></a></div>
-                  <div class="col-4"><a href="/assets/admin/img/gallery/14.png" data-gallery="gallery-photos"><img class="w-100 rounded-3" src="/assets/admin/img/gallery/14.png" alt=""></a></div>
-                  <div class="col-4"><a href="/assets/admin/img/gallery/15.png" data-gallery="gallery-photos"><img class="w-100 rounded-3" src="/assets/admin/img/gallery/15.png" alt=""></a></div>
-                  <div class="col-4"><a href="/assets/admin/img/gallery/16.png" data-gallery="gallery-photos"><img class="w-100 rounded-3" src="/assets/admin/img/gallery/16.png" alt=""></a></div>
+                  @forelse($recent_photos as $photo)
+                  <div class="col-4"><a href="{{ $photo->path }}" class="class-post-photo" data-gallery="gallery-photos"><img class="w-100 rounded-3" style="aspect-ratio: 1 / 1; object-fit: cover;" src="{{ $photo->path }}" alt=""></a></div>
+                  @empty
+                  <div class="col-12 text-body-tertiary fs-9">Chưa có ảnh nào.</div>
+                  @endforelse
                 </div>
               </div>
               <div class="d-flex pb-4 align-items-end border-bottom border-translucent border-dashed">
@@ -129,7 +126,7 @@
                     <div class="row g-1">
                       @foreach($post->photos as $photo)
                       <div class="{{ $post->photos->count() === 1 ? 'col-12' : ($post->photos->count() === 2 ? 'col-6' : 'col-4') }}">
-                        <a href="{{ $photo->path }}" data-gallery="gallery-class-post-{{ $post->id }}">
+                        <a href="{{ $photo->path }}" class="class-post-photo" data-gallery="gallery-class-post-{{ $post->id }}">
                           <img class="rounded w-100 h-100" style="object-fit: cover; aspect-ratio: 1 / 1;" src="{{ $photo->path }}" alt="">
                         </a>
                       </div>
@@ -194,6 +191,10 @@
 
 @section('js')
 <script type="text/javascript">
+if (window.GLightbox) {
+    GLightbox({ selector: '.class-post-photo' });
+}
+
 function uploadClassPostPhoto(file) {
     var formData = new FormData();
     formData.append('file', file);

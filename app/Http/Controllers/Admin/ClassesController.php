@@ -91,9 +91,23 @@ class ClassesController extends BaseController
             $post->photos = $postPhotos->get($post->id, collect());
         }
 
+        $recent_photos = DB::table('post_class')
+        ->join('posts', 'posts.id', 'post_class.post_id')
+        ->join('post_files', 'post_files.post_id', 'posts.id')
+        ->join('files', 'files.id', 'post_files.file_id')
+        ->where('post_class.class_id', $class->id)
+        ->where('posts.school_id', $school_id)
+        ->whereNull('posts.deleted_at')
+        ->select('files.id', 'files.path')
+        ->orderBy('post_files.created_at', 'desc')
+        ->orderBy('post_files.id', 'desc')
+        ->limit(6)
+        ->get();
+
         $data['class'] = $class;
         $data['students'] = $students;
         $data['posts'] = $posts;
+        $data['recent_photos'] = $recent_photos;
         $data['today'] = $today;
         $data['present_count'] = $students->filter(fn($s) => $s->attendance_status == 'present')->count();
         $data['absent_count'] = $students->filter(fn($s) => $s->attendance_status == 'absent')->count();
