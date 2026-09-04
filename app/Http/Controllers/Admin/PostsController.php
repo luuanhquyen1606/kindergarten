@@ -51,7 +51,8 @@ class PostsController extends BaseController
          ->leftJoin('files','files.id','posts.photo_id')
          ->leftJoin('categories','categories.id','posts.category_id')
          ->select('posts.*', 'files.id as file_id', 'categories.name as category_name','routings.slug as routing_slug')
-        ->where('posts.school_id', $this->app['school']->id);
+        ->where('posts.school_id', $this->app['school']->id)
+        ->whereIn('posts.type', ['news', 'event']);
         if($request->get('type'))
         {
             $posts->where('posts.type', $request->get('type'));

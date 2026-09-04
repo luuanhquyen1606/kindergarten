@@ -94,155 +94,160 @@
               </div>
             </div>
             <div class="col-12 col-xl-8">
-              <div class="mb-9">
-                <div class="mb-5">
-                  <div class="card mb-4">
-                    <div class="card-body p-3 p-sm-4">
-                      <div class="border-bottom border-translucent mb-3">
-                        <div class="d-flex align-items-center mb-3"><a href="../../apps/social/profile.html">
-                            <div class="avatar avatar-xl  me-2">
-                              <img class="rounded-circle " src="/assets/admin/img//team/9.webp" alt="">
-                            </div>
-                          </a>
-                          <div class="flex-1"><a class="fw-bold mb-0 text-body-emphasis" href="../../apps/social/profile.html">Erza Bridgest</a>
-                            <p class="fs-10 mb-0 text-body-tertiary text-opacity-85 fw-semibold">35 mins ago<span class="fa-solid fa-circle text-body-quaternary text-opacity-50" data-fa-transform="shrink-10 down-2"></span>Mustafar, British Columbia<span class="fa-solid fa-circle text-body-quaternary text-opacity-50" data-fa-transform="shrink-10 down-2"></span><span class="fa-solid fa-earth-americas text-body"></span></p>
-                          </div>
-                          <div class="btn-reveal-trigger"><button class="btn btn-sm dropdown-toggle dropdown-caret-none transition-none d-flex btn-reveal" type="button" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false" data-bs-reference="parent"><span class="fas fa-ellipsis-h"></span></button>
-                            <div class="dropdown-menu dropdown-menu-end py-2"><a class="dropdown-item" href="#!">Edit</a><a class="dropdown-item text-danger" href="#!">Delete</a><a class="dropdown-item" href="#!">Download</a><a class="dropdown-item" href="#!">Report abuse</a></div>
-                          </div>
-                        </div>
-                        <p class="text-body-secondary">Melancholy is sadness that has taken on lightness.</p>
-                        <div class="row g-1 mb-5">
-                          <div class="col-3"><a href="/assets/admin/img/gallery/22.png" data-gallery="gallery-posts-0"><img class="rounded h-100 w-100" src="/assets/admin/img/gallery/22.png" alt="..."></a></div>
-                          <div class="col-3"><a href="/assets/admin/img/gallery/23.png" data-gallery="gallery-posts-0"><img class="rounded h-100 w-100" src="/assets/admin/img/gallery/23.png" alt="..."></a></div>
-                          <div class="col-6"><a href="/assets/admin/img/gallery/24.png" data-gallery="gallery-posts-0"><img class="rounded h-100 w-100" src="/assets/admin/img/gallery/24.png" alt="..."></a></div>
-                        </div>
-                      </div>
-                      <div class="d-flex"><button class="btn btn-link p-0 me-3 fs-10 fw-bolder" type="button"><span class="fa-solid fa-heart me-1"></span>345 Likes</button><button class="btn btn-link text-body p-0 fs-10 me-3 fw-bolder" type="button"><span class="fa-solid fa-comment me-1"></span>45 Comments</button><button class="btn btn-link text-body p-0 fs-10 me-2 fw-bolder" type="button"><span class="fa-solid fa-share me-1"></span>56 shares</button></div>
+              <div class="card mb-4">
+                <div class="card-body p-3 p-sm-4">
+                  <div class="d-flex align-items-center">
+                    <div class="avatar avatar-xl me-2">
+                      <img class="rounded-circle" src="{{ getPhotoUrl(Auth::user()->photo_id) }}" alt="">
                     </div>
-                    <div class="bg-body-highlight border-top border-translucent p-3 p-sm-4">
-                      <div class="d-flex align-items-start"><a href="../../apps/social/profile.html">
-                          <div class="avatar avatar-m  me-2">
-                            <img class="rounded-circle " src="/assets/admin/img//team/30.webp" alt="">
-                          </div>
-                        </a>
-                        <div class="flex-1">
-                          <div class="d-flex align-items-center"><a class="fw-bold mb-0 text-body-emphasis" href="../../apps/social/profile.html">Mamur Fechetti</a><span class="text-body-tertiary text-opacity-85 fw-semibold fs-10 ms-2">35 mins ago</span></div>
-                          <p class="mb-0">How long did it take to create this? It appears that you quickly produced the second one.</p><button class="btn btn-link p-0 text-body fw-bolder mb-2" type="button"><span class="fa-solid fa-reply fs-10 me-1"></span><span class="fw-bold fs-10">Reply</span></button>
-                          <div class="d-flex align-items-start mb-3"><a href="../../apps/social/profile.html">
-                              <div class="avatar avatar-m  me-2">
-                                <img class="rounded-circle " src="/assets/admin/img//team/62.webp" alt="">
-                              </div>
-                            </a>
-                            <div class="flex-1">
-                              <div class="d-flex align-items-center"><a class="fw-bold mb-0 text-body-emphasis" href="../../apps/social/profile.html">Zingko Kudobum</a><span class="text-body-tertiary text-opacity-85 fw-semibold fs-10 ms-2">5 mins ago</span></div>
-                              <p class="mb-0">I am so clever that sometimes I don't understand a single word of what I am saying.</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="d-flex align-items-center"><a href="../../apps/social/profile.html">
-                          <div class="avatar avatar-m  me-2">
-                            <img class="rounded-circle " src="/assets/admin/img//team/9.webp" alt="">
-                          </div>
-                        </a>
-                        <div class="flex-1"><input class="form-control" type="text" placeholder="Add comment"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="mb-5">
-                  <div class="card mb-4">
-                    <div class="card-body p-3 p-sm-4">
-                      <div class="border-bottom border-translucent mb-3">
-                        <div class="d-flex align-items-center mb-3"><a href="../../apps/social/profile.html">
-                            <div class="avatar avatar-xl  me-2">
-                              <img class="rounded-circle " src="/assets/admin/img//team/9.webp" alt="">
-                            </div>
-                          </a>
-                          <div class="flex-1"><a class="fw-bold mb-0 text-body-emphasis" href="../../apps/social/profile.html">Erza Bridgest</a>
-                            <p class="fs-10 mb-0 text-body-tertiary text-opacity-85 fw-semibold">3 days ago<span class="fa-solid fa-circle text-body-quaternary text-opacity-50" data-fa-transform="shrink-10 down-2"></span>Lothal, USA<span class="fa-solid fa-circle text-body-quaternary text-opacity-50" data-fa-transform="shrink-10 down-2"></span><span class="fa-solid fa-earth-americas text-body"></span></p>
-                          </div>
-                          <div class="btn-reveal-trigger"><button class="btn btn-sm dropdown-toggle dropdown-caret-none transition-none d-flex btn-reveal" type="button" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false" data-bs-reference="parent"><span class="fas fa-ellipsis-h"></span></button>
-                            <div class="dropdown-menu dropdown-menu-end py-2"><a class="dropdown-item" href="#!">Edit</a><a class="dropdown-item text-danger" href="#!">Delete</a><a class="dropdown-item" href="#!">Download</a><a class="dropdown-item" href="#!">Report abuse</a></div>
-                          </div>
-                        </div>
-                        <p class="text-body-secondary">A guy enters a bakery while carrying a 25-pound haddock.
-                          He asks the baker if he makes fish cakes. The rather perplexed baker responds in the negative.
-                          The guy responds "That's unfortunate.Today is his birthday"</p>
-                      </div>
-                      <div class="d-flex"><button class="btn btn-link p-0 me-3 fs-10 fw-bolder" type="button"><span class="fa-solid fa-heart me-1"></span>23 Likes</button><button class="btn btn-link text-body p-0 fs-10 me-3 fw-bolder" type="button"><span class="fa-solid fa-comment me-1"></span>9 Comments</button><button class="btn btn-link text-body p-0 fs-10 me-2 fw-bolder" type="button"><span class="fa-solid fa-share me-1"></span>3 shares</button></div>
-                    </div>
-                    <div class="bg-body-highlight border-top border-translucent p-3 p-sm-4">
-                      <div class="d-flex align-items-center"><a href="../../apps/social/profile.html">
-                          <div class="avatar avatar-m  me-2">
-                            <img class="rounded-circle " src="/assets/admin/img//team/20.webp" alt="">
-                          </div>
-                        </a>
-                        <div class="flex-1"><input class="form-control" type="text" placeholder="Add comment"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="mb-5">
-                  <div class="card mb-4">
-                    <div class="card-body p-3 p-sm-4">
-                      <div class="border-bottom border-translucent mb-3">
-                        <div class="d-flex align-items-center mb-3"><a href="../../apps/social/profile.html">
-                            <div class="avatar avatar-xl  me-2">
-                              <img class="rounded-circle " src="/assets/admin/img//team/9.webp" alt="">
-                            </div>
-                          </a>
-                          <div class="flex-1"><a class="fw-bold mb-0 text-body-emphasis" href="../../apps/social/profile.html">Zingko Kudobum</a>
-                            <p class="fs-10 mb-0 text-body-tertiary text-opacity-85 fw-semibold">35 mins ago<span class="fa-solid fa-circle text-body-quaternary text-opacity-50" data-fa-transform="shrink-10 down-2"></span>Consett, UK<span class="fa-solid fa-circle text-body-quaternary text-opacity-50" data-fa-transform="shrink-10 down-2"></span><span class="fa-solid fa-earth-americas text-body"></span></p>
-                          </div>
-                          <div class="btn-reveal-trigger"><button class="btn btn-sm dropdown-toggle dropdown-caret-none transition-none d-flex btn-reveal" type="button" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false" data-bs-reference="parent"><span class="fas fa-ellipsis-h"></span></button>
-                            <div class="dropdown-menu dropdown-menu-end py-2"><a class="dropdown-item" href="#!">Edit</a><a class="dropdown-item text-danger" href="#!">Delete</a><a class="dropdown-item" href="#!">Download</a><a class="dropdown-item" href="#!">Report abuse</a></div>
-                          </div>
-                        </div>
-                        <p class="text-body-secondary">Fear can hold you prisoner. Hope can set you free. - King</p>
-                        <div class="row g-1 mb-5">
-                          <div class="col-3"><a href="/assets/admin/img/gallery/25.png" data-gallery="gallery-posts-2"><img class="rounded h-100 w-100" src="/assets/admin/img/gallery/25.png" alt="..."></a></div>
-                          <div class="col-3"><a href="/assets/admin/img/gallery/26.png" data-gallery="gallery-posts-2"><img class="rounded h-100 w-100" src="/assets/admin/img/gallery/26.png" alt="..."></a></div>
-                        </div>
-                      </div>
-                      <div class="d-flex"><button class="btn btn-link p-0 me-3 fs-10 fw-bolder" type="button"><span class="fa-solid fa-heart me-1"></span>345 Likes</button><button class="btn btn-link text-body p-0 fs-10 me-3 fw-bolder" type="button"><span class="fa-solid fa-comment me-1"></span>45 Comments</button><button class="btn btn-link text-body p-0 fs-10 me-2 fw-bolder" type="button"><span class="fa-solid fa-share me-1"></span>56 shares</button></div>
-                    </div>
-                    <div class="bg-body-highlight border-top border-translucent p-3 p-sm-4">
-                      <div class="d-flex align-items-start"><a href="../../apps/social/profile.html">
-                          <div class="avatar avatar-m  me-2">
-                            <img class="rounded-circle " src="/assets/admin/img//team/14.webp" alt="">
-                          </div>
-                        </a>
-                        <div class="flex-1">
-                          <div class="d-flex align-items-center"><a class="fw-bold mb-0 text-body-emphasis" href="../../apps/social/profile.html">Sutanuka Gomez</a><span class="text-body-tertiary text-opacity-85 fw-semibold fs-10 ms-2">35 mins ago</span></div>
-                          <p class="mb-0">Time is the best teacher; Unfortunately it kills all its students!</p><button class="btn btn-link p-0 text-body fw-bolder mb-2" type="button"><span class="fa-solid fa-reply fs-10 me-1"></span><span class="fw-bold fs-10">Reply</span></button>
-                          <div class="d-flex align-items-start mb-3"><a href="../../apps/social/profile.html">
-                              <div class="avatar avatar-m  me-2">
-                                <img class="rounded-circle " src="/assets/admin/img//team/27.webp" alt="">
-                              </div>
-                            </a>
-                            <div class="flex-1">
-                              <div class="d-flex align-items-center"><a class="fw-bold mb-0 text-body-emphasis" href="../../apps/social/profile.html">Zingko Kudobum</a><span class="text-body-tertiary text-opacity-85 fw-semibold fs-10 ms-2">5 mins ago</span></div>
-                              <p class="mb-0">If you’re too open-minded, your brains will fall out.!</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="d-flex align-items-center"><a href="../../apps/social/profile.html">
-                          <div class="avatar avatar-m  me-2">
-                            <img class="rounded-circle " src="/assets/admin/img//team/14.webp" alt="">
-                          </div>
-                        </a>
-                        <div class="flex-1"><input class="form-control" type="text" placeholder="Add comment"></div>
-                      </div>
-                    </div>
+                    <button type="button" class="btn btn-phoenix-secondary text-start flex-1 rounded-pill text-body-tertiary" data-bs-toggle="modal" data-bs-target="#create_class_post_modal">
+                      Chia sẻ điều gì đó với lớp học...
+                    </button>
                   </div>
                 </div>
               </div>
-              <div class="text-center"><a class="btn btn-link fs-8 p-0" href="#!">Load more</a></div>
+
+              <div id="class_posts_feed">
+                @forelse($posts as $post)
+                <div class="card mb-4" id="class_post_{{ $post->id }}">
+                  <div class="card-body p-3 p-sm-4">
+                    <div class="d-flex align-items-center mb-3">
+                      <div class="avatar avatar-xl me-2">
+                        <img class="rounded-circle" src="{{ getPhotoUrl($post->author_photo_id) }}" alt="">
+                      </div>
+                      <div class="flex-1">
+                        <span class="fw-bold mb-0 text-body-emphasis d-block">{{ $post->author_name ?? 'Giáo viên' }}</span>
+                        <p class="fs-10 mb-0 text-body-tertiary text-opacity-85 fw-semibold">{{ \Carbon\Carbon::parse($post->created_at)->format('d/m/Y H:i') }}</p>
+                      </div>
+                      <div class="btn-reveal-trigger">
+                        <button class="btn btn-sm dropdown-toggle dropdown-caret-none transition-none d-flex btn-reveal" type="button" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false" data-bs-reference="parent"><span class="fas fa-ellipsis-h"></span></button>
+                        <div class="dropdown-menu dropdown-menu-end py-2"><a class="dropdown-item text-danger delete-class-post" href="#!" data-post-id="{{ $post->id }}">Xóa</a></div>
+                      </div>
+                    </div>
+                    <p class="text-body-secondary mb-3" style="white-space: pre-line;">{{ $post->content }}</p>
+                    @if($post->photo_id)
+                    <img class="rounded w-100" src="{{ getPhotoUrl($post->photo_id) }}" alt="">
+                    @endif
+                  </div>
+                </div>
+                @empty
+                <div class="card mb-4">
+                  <div class="card-body p-4 text-center text-body-tertiary">
+                    Chưa có bài viết nào cho lớp học này.
+                  </div>
+                </div>
+                @endforelse
+              </div>
             </div>
           </div>
         </div>
 
+        <div class="modal fade" id="create_class_post_modal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <form id="create_class_post_form" action="{{ route('classes.posts.store', $class->id) }}" method="POST">
+                @csrf
+                <div class="modal-header">
+                  <h5 class="modal-title">Tạo bài viết cho lớp {{ $class->name }}</h5>
+                  <button type="button" class="btn btn-close p-1" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div class="d-flex align-items-center mb-3">
+                    <div class="avatar avatar-l me-2">
+                      <img class="rounded-circle" src="{{ getPhotoUrl(Auth::user()->photo_id) }}" alt="">
+                    </div>
+                    <span class="fw-bold text-body-emphasis">{{ Auth::user()->name }}</span>
+                  </div>
+                  <div class="form-floating mb-3">
+                    <textarea class="form-control" name="content" id="class_post_content" style="height: 120px" placeholder="Chia sẻ điều gì đó với lớp học..." required></textarea>
+                    <label for="class_post_content">Nội dung</label>
+                    <div class="invalid-feedback"></div>
+                  </div>
+
+                  <div id="class_post_photo_preview" class="mb-3" style="display:none;">
+                    <img id="class_post_photo_preview_img" class="rounded w-100" src="" alt="">
+                  </div>
+
+                  <input type="hidden" name="photo_id" id="class_post_photo_id" value="">
+
+                  <label class="btn btn-phoenix-secondary mb-0" for="class_post_photo_input">
+                    <span class="fas fa-image me-2"></span>Thêm ảnh
+                  </label>
+                  <input type="file" id="class_post_photo_input" accept="image/*" class="d-none">
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-phoenix-secondary" data-bs-dismiss="modal">Hủy</button>
+                  <button type="submit" class="btn btn-primary">Đăng bài</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+@endsection
+
+@section('js')
+<script type="text/javascript">
+$('#class_post_photo_input').on('change', function () {
+    var file = this.files[0];
+    if (!file) return;
+
+    var formData = new FormData();
+    formData.append('file', file);
+
+    $.ajax({
+        url: "{{ route('file_upload') }}",
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (res) {
+            $('#class_post_photo_id').val(res.id);
+            $('#class_post_photo_preview_img').attr('src', res.path);
+            $('#class_post_photo_preview').show();
+        }
+    });
+});
+
+$('#create_class_post_form').on('submit', function (e) {
+    e.preventDefault();
+    var $form = $(this);
+    $('.invalid-feedback').html('');
+    $form.find('.form-control').removeClass('is-invalid');
+
+    $.ajax({
+        url: $form.attr('action'),
+        type: 'POST',
+        data: $form.serialize(),
+        success: function () {
+            window.location.reload();
+        },
+        error: function (xhr) {
+            if (xhr.status === 422) {
+                var errors = xhr.responseJSON.errors;
+                $.each(errors, function (field, msgs) {
+                    $("[name='" + field + "']").addClass('is-invalid');
+                    $("[name='" + field + "']").siblings('.invalid-feedback').html(msgs[0]);
+                });
+            }
+        }
+    });
+});
+
+$(document).on('click', '.delete-class-post', function (e) {
+    e.preventDefault();
+    if (!confirm('Xóa bài viết này?')) return;
+    var postId = $(this).data('post-id');
+    var $card = $('#class_post_' + postId);
+
+    $.ajax({
+        url: '{{ url('/admin/classes/'.$class->id.'/posts') }}/' + postId,
+        type: 'POST',
+        data: { _token: '{{ csrf_token() }}', _method: 'DELETE' },
+        success: function () {
+            $card.remove();
+        }
+    });
+});
+</script>
 @endsection

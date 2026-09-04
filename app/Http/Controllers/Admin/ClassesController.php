@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 class ClassesController extends BaseController
 {
@@ -69,8 +70,19 @@ class ClassesController extends BaseController
         ->orderBy('students.name')
         ->get();
 
+        $posts = DB::table('post_class')
+        ->join('posts', 'posts.id', 'post_class.post_id')
+        ->leftJoin('users', 'users.id', 'posts.user_id')
+        ->select('posts.*', 'users.name as author_name', 'users.photo_id as author_photo_id')
+        ->where('post_class.class_id', $class->id)
+        ->where('posts.school_id', $school_id)
+        ->whereNull('posts.deleted_at')
+        ->orderBy('posts.created_at', 'desc')
+        ->get();
+
         $data['class'] = $class;
         $data['students'] = $students;
+        $data['posts'] = $posts;
         $data['today'] = $today;
         $data['present_count'] = $students->filter(fn($s) => $s->attendance_status == 'present')->count();
         $data['absent_count'] = $students->filter(fn($s) => $s->attendance_status == 'absent')->count();
@@ -195,6 +207,82 @@ class ClassesController extends BaseController
     
      return redirect()->route('classes.show', $post_id)
                      ->with('success', 'Post created!');
+    }
+
+    public function storePost(Request $request, $id)
+    {
+        $school_id = $this->app['school']->id;
+
+        $class = DB::table('classes')
+        ->where('id', $id)
+        ->where('school_id', $school_id)
+        ->whereNull('deleted_at')
+        ->first();
+
+        if (!$class) {
+            abort(404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'content' => 'required|string',
+            'photo_id' => 'nullable|exists:files,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $title = Str::limit(trim(strip_tags($request->get('content'))), 60, '');
+
+        $post_id = DB::table('posts')->insertGetId([
+            'type' => 'class_update',
+            'title' => $title !== '' ? $title : 'Cập nhật lớp học',
+            'content' => $request->get('content'),
+            'photo_id' => $request->get('photo_id') ?: null,
+            'school_id' => $school_id,
+            'user_id' => Auth::id(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('post_class')->insert([
+            'class_id' => $class->id,
+            'post_id' => $post_id,
+        ]);
+
+        if ($request->ajax()) {
+            return response()->json(['status' => 'ok']);
+        }
+
+        return redirect()->route('classes.show', $class->id)
+                     ->with('success', 'Đã đăng bài viết!');
+    }
+
+    public function destroyPost(Request $request, $id, $postId)
+    {
+        $school_id = $this->app['school']->id;
+
+        $belongsToClass = DB::table('post_class')
+        ->where('class_id', $id)
+        ->where('post_id', $postId)
+        ->exists();
+
+        if ($belongsToClass) {
+            DB::table('posts')
+            ->where('id', $postId)
+            ->where('school_id', $school_id)
+            ->update(['deleted_at' => now()]);
+        }
+
+        if ($request->ajax()) {
+            return response()->json(['status' => 'ok']);
+        }
+
+        return redirect()->route('classes.show', $id)
+                     ->with('success', 'Đã xóa bài viết.');
     }
 
     public function destroy($id){

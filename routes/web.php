@@ -39,6 +39,8 @@ Route::middleware([
     Route::get('/admin', [AdminController::class, 'index']);  
     Route::resource('/admin/programs', ProgramsController::class)->only(['index', 'show', 'create', 'store', 'destroy','edit','update']);
     Route::resource('/admin/classes', ClassesController::class)->only(['index', 'show', 'create', 'store', 'destroy','edit','update']);
+    Route::post('/admin/classes/{class}/posts', [ClassesController::class, 'storePost'])->whereNumber('class')->name('classes.posts.store');
+    Route::delete('/admin/classes/{class}/posts/{post}', [ClassesController::class, 'destroyPost'])->whereNumber(['class', 'post'])->name('classes.posts.destroy');
     Route::get('/admin/attendance', [AttendancesController::class, 'index'])->name('attendances.index');
     Route::get('/admin/attendance/{class_id}', [AttendancesController::class, 'show'])->whereNumber('class_id')->name('attendances.show');
     Route::post('/admin/attendance/{class_id}/update', [AttendancesController::class, 'update'])->whereNumber('class_id')->name('attendances.update');
