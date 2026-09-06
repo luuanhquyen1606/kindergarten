@@ -5,14 +5,19 @@
           <div class="card mb-5">
             <div class="card-header d-flex justify-content-center align-items-end position-relative mb-7 mb-xxl-0" style="min-height: 214px; ">
               <div class="hover-actions-trigger position-static">
-                <div class="bg-holder rounded-top" style="background-image:url(/assets/admin/img/generic/cover-photo.png);"></div><input class="d-none" id="upload-cover-image" type="file"><label class="cover-image-file-input" for="upload-cover-image"></label>
+
+                <div class="bg-holder rounded-top" >
+                  <img preview-input-id="photo_id" style="height: 214px; width: 100%; object-fit: cover;" src="<?php echo ($class->photo_id)? getPhotoUrl($class->photo_id) : '/assets/admin/img/generic/cover-photo.png'; ?>" />
+                </div>
+                <input  style="display:none;" type="text" id="photo_id" class="media-browser-input"  name="photo_id"  value="<?php echo $class->photo_id;?>"> 
+                <label  class="cover-image-file-input"  for="photo_id"></label>
                 <div class="hover-actions end-0 bottom-0 pe-1 pb-2 text-white"><span class="fa-solid fa-camera me-2 overlay-icon"></span></div>
                 <!--/.bg-holder-->
-              </div><input class="d-none" id="upload-porfile-picture" type="file">
-              <div class="hoverbox feed-profile" style="width: 150px; height: 150px">
-                <div class="hoverbox-content rounded-circle d-flex flex-center z-1" style="--phoenix-bg-opacity: .56;"><span class="fa-solid fa-camera fs-3 text-secondary-light"></span></div>
-                <div class="position-relative bg-body-quaternary rounded-circle cursor-pointer d-flex flex-center mb-xxl-7">
-                  <div class="avatar avatar-5xl"><img class="rounded-circle rounded-circle img-thumbnail shadow-sm border-0" src="/assets/admin/img/team/9.webp" alt=""></div><label class="w-100 h-100 position-absolute z-1" for="upload-porfile-picture"></label>
+              </div>
+              <div class=" feed-profile" style="width: 150px; height: 150px">
+                <div class="rounded-circle d-flex flex-center z-1" ></div>
+                <div class="position-relative bg-body-quaternary rounded-circle d-flex flex-center mb-xxl-7">
+                  <div class="avatar avatar-5xl"><img class="rounded-circle rounded-circle img-thumbnail shadow-sm border-0" src="{{ getPhotoUrl($class->teacher_photo_id) }}" alt=""></div>
                 </div>
               </div>
             </div>
@@ -186,7 +191,7 @@
             </div>
           </div>
         </div>
-
+@include('admin.pages.media_browser')
 @endsection
 
 @section('js')
@@ -194,6 +199,14 @@
 if (window.GLightbox) {
     GLightbox({ selector: '.class-post-photo' });
 }
+
+$('#photo_id').on('change', function () {
+    $.ajax({
+        url: "{{ route('classes.updatePhoto', $class->id) }}",
+        type: 'POST',
+        data: { _token: '{{ csrf_token() }}', photo_id: $(this).val() },
+    });
+});
 
 function uploadClassPostPhoto(file) {
     var formData = new FormData();

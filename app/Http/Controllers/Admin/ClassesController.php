@@ -34,7 +34,7 @@ class ClassesController extends BaseController
         ->leftJoin('users', 'users.id', 'classes.teacher_id')
         ->leftJoin('campuses', 'campuses.id', 'classes.campus_id')
         ->select('classes.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path',
-            'programs.name as program_name', 'users.name as teacher_name', 'campuses.name as campus_name')
+            'programs.name as program_name', 'users.name as teacher_name', 'users.photo_id as teacher_photo_id', 'campuses.name as campus_name')
         ->where('classes.school_id', $school_id)
         ->where('classes.id', $id)
         ->whereNull('classes.deleted_at')
@@ -232,6 +232,41 @@ class ClassesController extends BaseController
     
      return redirect()->route('classes.show', $post_id)
                      ->with('success', 'Post created!');
+    }
+
+    public function updatePhoto(Request $request, $id)
+    {
+        $school_id = $this->app['school']->id;
+
+        $class = DB::table('classes')
+        ->where('id', $id)
+        ->where('school_id', $school_id)
+        ->whereNull('deleted_at')
+        ->first();
+
+        if (!$class) {
+            abort(404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'photo_id' => 'required|exists:files,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        DB::table('classes')
+        ->where('id', $class->id)
+        ->update([
+            'photo_id' => $request->get('photo_id'),
+            'updated_at' => now(),
+        ]);
+
+        return response()->json(['status' => 'ok']);
     }
 
     public function storePost(Request $request, $id)
