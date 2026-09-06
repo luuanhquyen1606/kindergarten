@@ -56,6 +56,7 @@
         userLinkRTL.setAttribute('disabled', true);
       }
     </script>
+    <link href="/assets/admin/vendors/glightbox/glightbox.min.css" rel="stylesheet">
     <link href="/assets/admin/vendors/leaflet/leaflet.css" rel="stylesheet">
     <link href="/assets/admin/vendors/leaflet.markercluster/MarkerCluster.css" rel="stylesheet">
     <link href="/assets/admin/vendors/leaflet.markercluster/MarkerCluster.Default.css" rel="stylesheet">
