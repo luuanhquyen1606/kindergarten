@@ -174,13 +174,80 @@
                     <div class="invalid-feedback"></div>
                   </div>
 
-                  <div id="class_post_photos_preview" class="row g-2 mb-3"></div>
-                  <div id="class_post_files_inputs"></div>
 
-                  <label class="btn btn-phoenix-secondary mb-0" for="class_post_photo_input">
-                    <span class="fas fa-image me-2"></span>Thêm ảnh
-                  </label>
-                  <input type="file" id="class_post_photo_input" accept="image/*" multiple class="d-none">
+
+
+
+
+                   <div class="col-sm-12 col-md-12">
+                <div class="form-floating">
+
+
+                        <div class="card mt-5">
+
+                          <div class="card-body pt-0">
+                            <div class="myfiles-action-bar mx-n4 mb-4">
+                              <h6 class="mb-0 text-body-tertiary" id="file-manager-replace-element">Thêm file, ảnh cho bài viết</h6>
+                              <a data-input-class="file_uploaded" class="multiple-media-browser-input btn btn-phoenix-secondary" data-bs-toggle="tooltip" data-bs-title="Thêm ảnh file cho bài viết">
+                                <span class="fas fa-cloud-upload-alt"></span> Chọn file
+                              </a>
+
+                              <script type="text/javascript">
+
+                              </script>
+                            </div>
+                            <div class="row gx-xxl-9" id="bulk-select-body">
+                              <div class="col">
+                                <div class="files-container" data-files-container="data-files-container">
+                                  
+                                  
+                                  
+                                  
+                                  
+                                  <?php
+                                  for ($i=0;$i<=100;$i++)
+                                  {
+                                  ?>
+                                  <div id="preview_<?php echo $i;?>" class="file_uploaded text-center" style="display:none">
+                                    <div class="file-box-wrapper img-zoom-hover">
+                                      <div class="position-relative h-100">
+                                        <div class="file-box overflow-hidden">
+                                          <img id="preview_img" class="photo_img w-100 h-100 object-fit-cover" src="" alt=""></div>
+                                          <input type="text" style="display:none" class="photo_input"   name="files[<?php echo $i;?>]" value="">
+                                      </div>
+                                      <div class="dropdown lh-1 position-absolute top-0 end-0 mt-2 me-2">
+                                        <button onclick="delete_uploadFiles(<?php echo $i;?>)" class="delete_selected_file btn btn-square-sm text-body position-relative z-1" type="button" data-boundary="window" aria-haspopup="true" aria-expanded="false" data-bs-reference="parent">
+                                          <span class="text-danger fas fa-trash"></span>
+                                        </button>                                     
+                                      </div>
+                                      <a id="preview_name" class="d-block fw-bold text-body-highlight mt-2 text-nowrap text-truncate fs-9 fs-sm-8" href="#!"></a>
+                                      <h6  class="mb-0 fw-semibold text-body-tertiary fs-10 fs-sm-9"><span id="preview_size"></span> mb </h6>
+                                    </div>
+                                  </div>
+                                  <?php
+                                  }
+                                  ?>
+                                  
+                                </div>
+                              </div>
+                              
+                            </div>
+                          </div>
+                        </div>
+
+
+                </div>
+              </div>
+
+
+
+              
+
+              
+
+                  
+                  
+                  
                   <div id="class_post_upload_status" class="fs-10 text-body-tertiary mt-2"></div>
                 </div>
                 <div class="modal-footer">
