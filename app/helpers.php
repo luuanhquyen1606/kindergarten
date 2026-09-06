@@ -43,6 +43,8 @@ if (! function_exists('getPhotoThumbnail')) {
             return $thumb;
     }
 }
+
+
 if (! function_exists('getPhotoUrl')) {
     function getPhotoUrl($id){
         $file = $post = DB::table('files')
@@ -140,7 +142,7 @@ if (!function_exists('getImageSet')) {
    
     $sets=[]; 
 
-    if(!file_exists('/var/www/kidoo/public/'.$filepath))
+    if(!file_exists('/var/www/kindergarten/public/'.$filepath))
     {
        //echo "'".$filepath."',";     
     }
@@ -150,7 +152,7 @@ if (!function_exists('getImageSet')) {
         $setpath = preg_replace('/\.[^.]+$/', '.webp', $setpath);
        
      
-        if(file_exists('/var/www/kidoo/public/'.$setpath))
+        if(file_exists('/var/www/kindergarten/public/'.$setpath))
             {
                 $sets[$size] = $setpath;
             }
@@ -176,8 +178,8 @@ function arrayToSrcset($images) {
     return implode(', ', $parts);
 }
 function resizeImageByWidth($source, $destination, $newWidth, $quality = 100) {
-    $source ='/var/www/kidoo/public/'.$source;
-    $destination ='/var/www/kidoo/public/'.$destination;
+    $source ='/var/www/kindergarten/public/'.$source;
+    $destination ='/var/www/kindergarten/public/'.$destination;
     try {
         $image = new Imagick($source);
 

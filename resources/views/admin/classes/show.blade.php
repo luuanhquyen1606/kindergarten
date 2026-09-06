@@ -68,7 +68,7 @@
                 </div>
                 <div class="row g-3">
                   @forelse($recent_photos as $photo)
-                  <div class="col-4"><a href="{{ $photo->path }}" class="class-post-photo" data-gallery="gallery-photos"><img class="w-100 rounded-3" style="aspect-ratio: 1 / 1; object-fit: cover;" src="{{ $photo->path }}" alt=""></a></div>
+                  <div class="col-4"><a href="{{ $photo->path }}" class="class-post-photo" data-gallery="gallery-photos"><img class="w-100 rounded-3" style="aspect-ratio: 1 / 1; object-fit: cover;" src="<?php echo getPhotoThumbnail($photo->id, 500); ?>" alt=""></a></div>
                   @empty
                   <div class="col-12 text-body-tertiary fs-9">Chưa có ảnh nào.</div>
                   @endforelse
@@ -115,7 +115,7 @@
                   <div class="card-body p-3 p-sm-4">
                     <div class="d-flex align-items-center mb-3">
                       <div class="avatar avatar-xl me-2">
-                        <img class="rounded-circle" src="{{ getPhotoUrl($post->author_photo_id) }}" alt="">
+                        <img class="rounded-circle" src="{{ getPhotoThumbnail($post->author_photo_id, 100) }}" alt="">
                       </div>
                       <div class="flex-1">
                         <span class="fw-bold mb-0 text-body-emphasis d-block">{{ $post->author_name ?? 'Giáo viên' }}</span>
@@ -132,7 +132,7 @@
                       @foreach($post->photos as $photo)
                       <div class="{{ $post->photos->count() === 1 ? 'col-12' : ($post->photos->count() === 2 ? 'col-6' : 'col-4') }}">
                         <a href="{{ $photo->path }}" class="class-post-photo" data-gallery="gallery-class-post-{{ $post->id }}">
-                          <img class="rounded w-100 h-100" style="object-fit: cover; aspect-ratio: 1 / 1;" src="{{ $photo->path }}" alt="">
+                          <img class="rounded w-100 h-100" style="object-fit: cover; aspect-ratio: 1 / 1;" src="<?php echo getPhotoThumbnail($photo->id, 500); ?>" alt="">
                         </a>
                       </div>
                       @endforeach
@@ -153,7 +153,7 @@
         </div>
 
         <div class="modal fade" id="create_class_post_modal" tabindex="-1" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-dialog modal-dialog-centered" style="max-width: 75vw;">
             <div class="modal-content">
               <form id="create_class_post_form" action="{{ route('classes.posts.store', $class->id) }}" method="POST">
                 @csrf
