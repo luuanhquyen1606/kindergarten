@@ -149,7 +149,7 @@
                 @endforelse
               </div>
             </div>
-          </div>
+          </div> 
         </div>
 
         <div class="modal fade" id="create_class_post_modal" tabindex="-1" aria-hidden="true">
