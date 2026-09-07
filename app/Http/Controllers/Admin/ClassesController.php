@@ -20,9 +20,165 @@ class ClassesController extends BaseController
         ->whereNull('classes.deleted_at')
         ->orderBy('classes.created_at', 'desc')
         ->get(); 
-        $data['classes']=$classes;  
-        return view('admin.classes.index',$data); 
-    }  
+        $data['classes']=$classes;
+        return view('admin.classes.index',$data);
+    }
+    public function albums($id)
+    {
+        $school_id = $this->app['school']->id;
+
+        $class = DB::table('classes')
+        ->where('id', $id)
+        ->where('school_id', $school_id)
+        ->whereNull('deleted_at')
+        ->first();
+
+        if (!$class) {
+            abort(404);
+        }
+
+        $albums = DB::table('post_class')
+        ->join('posts', 'posts.id', 'post_class.post_id')
+        ->leftJoin('users', 'users.id', 'posts.user_id')
+        ->select('posts.*', 'users.name as author_name', 'users.photo_id as author_photo_id')
+        ->where('post_class.class_id', $class->id)
+        ->where('posts.school_id', $school_id)
+        ->whereNull('posts.deleted_at')
+        ->whereExists(function ($query) {
+            $query->select(DB::raw(1))
+                ->from('post_files')
+                ->whereColumn('post_files.post_id', 'posts.id');
+        })
+        ->orderBy('posts.created_at', 'desc')
+        ->get();
+
+        $photos = DB::table('post_files')
+        ->join('files', 'files.id', 'post_files.file_id')
+        ->whereIn('post_files.post_id', $albums->pluck('id'))
+        ->select('post_files.post_id', 'files.id', 'files.path')
+        ->get()
+        ->groupBy('post_id');
+
+        foreach ($albums as $album) {
+            $album->photos = $photos->get($album->id, collect());
+        }
+
+        $data['class'] = $class;
+        $data['albums'] = $albums;
+
+        return view('admin.classes.albums', $data);
+    }
+    public function albumShow($id, $postId)
+    {
+        $school_id = $this->app['school']->id;
+
+        $class = DB::table('classes')
+        ->where('id', $id)
+        ->where('school_id', $school_id)
+        ->whereNull('deleted_at')
+        ->first();
+
+        if (!$class) {
+            abort(404);
+        }
+
+        $album = DB::table('post_class')
+        ->join('posts', 'posts.id', 'post_class.post_id')
+        ->leftJoin('users', 'users.id', 'posts.user_id')
+        ->select('posts.*', 'users.name as author_name', 'users.photo_id as author_photo_id')
+        ->where('post_class.class_id', $class->id)
+        ->where('posts.id', $postId)
+        ->where('posts.school_id', $school_id)
+        ->whereNull('posts.deleted_at')
+        ->first();
+
+        if (!$album) {
+            abort(404);
+        }
+
+        $album->photos = DB::table('post_files')
+        ->join('files', 'files.id', 'post_files.file_id')
+        ->where('post_files.post_id', $album->id)
+        ->select('files.id', 'files.path', 'files.original_name')
+        ->get();
+
+        $data['class'] = $class;
+        $data['album'] = $album;
+
+        return view('admin.classes.album_show', $data);
+    }
+    public function downloadAlbum($id, $postId)
+    {
+        $school_id = $this->app['school']->id;
+
+        $class = DB::table('classes')
+        ->where('id', $id)
+        ->where('school_id', $school_id)
+        ->whereNull('deleted_at')
+        ->first();
+
+        if (!$class) {
+            abort(404);
+        }
+
+        $album = DB::table('post_class')
+        ->join('posts', 'posts.id', 'post_class.post_id')
+        ->where('post_class.class_id', $class->id)
+        ->where('posts.id', $postId)
+        ->where('posts.school_id', $school_id)
+        ->whereNull('posts.deleted_at')
+        ->select('posts.*')
+        ->first();
+
+        if (!$album) {
+            abort(404);
+        }
+
+        $photos = DB::table('post_files')
+        ->join('files', 'files.id', 'post_files.file_id')
+        ->where('post_files.post_id', $album->id)
+        ->select('files.path', 'files.original_name')
+        ->get();
+
+        if ($photos->isEmpty()) {
+            abort(404);
+        }
+
+        $tmpDir = storage_path('app/tmp');
+        if (!is_dir($tmpDir)) {
+            mkdir($tmpDir, 0755, true);
+        }
+
+        $zipPath = $tmpDir . '/album_' . $album->id . '_' . time() . '.zip';
+
+        $zip = new \ZipArchive();
+        $zip->open($zipPath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+
+        $usedNames = [];
+        foreach ($photos as $photo) {
+            $filePath = public_path($photo->path);
+            if (!file_exists($filePath)) {
+                continue;
+            }
+
+            $name = $photo->original_name ?: basename($photo->path);
+            $count = $usedNames[$name] ?? 0;
+            $usedNames[$name] = $count + 1;
+            if ($count > 0) {
+                $extension = pathinfo($name, PATHINFO_EXTENSION);
+                $baseName = pathinfo($name, PATHINFO_FILENAME);
+                $name = $baseName . ' (' . $count . ')' . ($extension ? '.' . $extension : '');
+            }
+
+            $zip->addFile($filePath, $name);
+        }
+
+        $zip->close();
+
+        $zipName = Str::slug($album->title ?: 'album') . '.zip';
+
+        return response()->download($zipPath, $zipName)->deleteFileAfterSend(true);
+    }
     public function show($id)
     {
         $school_id = $this->app['school']->id;

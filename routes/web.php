@@ -39,6 +39,9 @@ Route::middleware([
     Route::get('/admin', [AdminController::class, 'index']);  
     Route::resource('/admin/programs', ProgramsController::class)->only(['index', 'show', 'create', 'store', 'destroy','edit','update']);
     Route::resource('/admin/classes', ClassesController::class)->only(['index', 'show', 'create', 'store', 'destroy','edit','update']);
+    Route::get('/admin/classes/{class}/albums', [ClassesController::class, 'albums'])->whereNumber('class')->name('classes.albums');
+    Route::get('/admin/classes/{class}/albums/{post}', [ClassesController::class, 'albumShow'])->whereNumber(['class', 'post'])->name('classes.albums.show');
+    Route::get('/admin/classes/{class}/albums/{post}/download', [ClassesController::class, 'downloadAlbum'])->whereNumber(['class', 'post'])->name('classes.albums.download');
     Route::post('/admin/classes/{class}/photo', [ClassesController::class, 'updatePhoto'])->whereNumber('class')->name('classes.updatePhoto');
     Route::get('/admin/classes/{class}/posts/load', [ClassesController::class, 'loadPosts'])->whereNumber('class')->name('classes.posts.load');
     Route::post('/admin/classes/{class}/posts', [ClassesController::class, 'storePost'])->whereNumber('class')->name('classes.posts.store');
