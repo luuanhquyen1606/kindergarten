@@ -109,47 +109,20 @@
                 </div>
               </div>
 
-              <div id="class_posts_feed">
-                @forelse($posts as $post)
-                <div class="card mb-4" id="class_post_{{ $post->id }}">
-                  <div class="card-body p-3 p-sm-4">
-                    <div class="d-flex align-items-center mb-3">
-                      <div class="avatar avatar-xl me-2">
-                        <img class="rounded-circle" src="{{ getPhotoThumbnail($post->author_photo_id, 100) }}" alt="">
-                      </div>
-                      <div class="flex-1">
-                        <span class="fw-bold mb-0 text-body-emphasis d-block">{{ $post->author_name ?? 'Giáo viên' }}</span>
-                        <p class="fs-10 mb-0 text-body-tertiary text-opacity-85 fw-semibold">{{ \Carbon\Carbon::parse($post->created_at)->format('d/m/Y H:i') }}</p>
-                      </div>
-                      <div class="btn-reveal-trigger">
-                        <button class="btn btn-sm dropdown-toggle dropdown-caret-none transition-none d-flex btn-reveal" type="button" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false" data-bs-reference="parent"><span class="fas fa-ellipsis-h"></span></button>
-                        <div class="dropdown-menu dropdown-menu-end py-2"><a class="dropdown-item text-danger delete-class-post" href="#!" data-post-id="{{ $post->id }}">Xóa</a></div>
-                      </div>
-                    </div>
-                    <p class="text-body-secondary mb-3" style="white-space: pre-line;">{{ $post->content }}</p>
-                    @if($post->photos->isNotEmpty())
-                    <div class="row g-1">
-                      @foreach($post->photos as $photo)
-                      <div class="{{ $post->photos->count() === 1 ? 'col-12' : ($post->photos->count() === 2 ? 'col-6' : 'col-4') }}">
-                        <a href="{{ $photo->path }}" class="class-post-photo" data-gallery="gallery-class-post-{{ $post->id }}">
-                          <img class="rounded w-100 h-100" style="object-fit: cover; aspect-ratio: 1 / 1;" src="<?php echo getPhotoThumbnail($photo->id, 500); ?>" alt="">
-                        </a>
-                      </div>
-                      @endforeach
-                    </div>
-                    @endif
-                  </div>
-                </div>
-                @empty
-                <div class="card mb-4">
+              <div id="class_posts_feed" data-offset="{{ $posts->count() }}" data-has-more="{{ $has_more_posts ? '1' : '0' }}" data-last-date="{{ $last_post_date }}">
+                @if($posts->isEmpty())
+                <div class="card mb-4" id="class_posts_empty">
                   <div class="card-body p-4 text-center text-body-tertiary">
                     Chưa có bài viết nào cho lớp học này.
                   </div>
                 </div>
-                @endforelse
+                @else
+                {!! $posts_html !!}
+                @endif
               </div>
+              <div id="class_posts_loading" class="text-center text-body-tertiary py-3" style="display:none;">Đang tải...</div>
             </div>
-          </div> 
+          </div>
         </div>
 
         <div class="modal fade" id="create_class_post_modal" tabindex="-1" aria-hidden="true">
@@ -179,65 +152,12 @@
 
 
 
-                   <div class="col-sm-12 col-md-12">
-                <div class="form-floating">
-
-
-                        <div class="card mt-5">
-
-                          <div class="card-body pt-0">
-                            <div class="myfiles-action-bar mx-n4 mb-4">
-                              <h6 class="mb-0 text-body-tertiary" id="file-manager-replace-element">Thêm file, ảnh cho bài viết</h6>
-                              <a data-input-class="file_uploaded" class="multiple-media-browser-input btn btn-phoenix-secondary" data-bs-toggle="tooltip" data-bs-title="Thêm ảnh file cho bài viết">
-                                <span class="fas fa-cloud-upload-alt"></span> Chọn file
-                              </a>
-
-                              <script type="text/javascript">
-
-                              </script>
-                            </div>
-                            <div class="row gx-xxl-9" id="bulk-select-body">
-                              <div class="col">
-                                <div class="files-container" data-files-container="data-files-container">
-                                  
-                                  
-                                  
-                                  
-                                  
-                                  <?php
-                                  for ($i=0;$i<=100;$i++)
-                                  {
-                                  ?>
-                                  <div id="preview_<?php echo $i;?>" class="file_uploaded text-center" style="display:none">
-                                    <div class="file-box-wrapper img-zoom-hover">
-                                      <div class="position-relative h-100">
-                                        <div class="file-box overflow-hidden">
-                                          <img id="preview_img" class="photo_img w-100 h-100 object-fit-cover" src="" alt=""></div>
-                                          <input type="text" style="display:none" class="photo_input"   name="files[<?php echo $i;?>]" value="">
-                                      </div>
-                                      <div class="dropdown lh-1 position-absolute top-0 end-0 mt-2 me-2">
-                                        <button onclick="delete_uploadFiles(<?php echo $i;?>)" class="delete_selected_file btn btn-square-sm text-body position-relative z-1" type="button" data-boundary="window" aria-haspopup="true" aria-expanded="false" data-bs-reference="parent">
-                                          <span class="text-danger fas fa-trash"></span>
-                                        </button>                                     
-                                      </div>
-                                      <a id="preview_name" class="d-block fw-bold text-body-highlight mt-2 text-nowrap text-truncate fs-9 fs-sm-8" href="#!"></a>
-                                      <h6  class="mb-0 fw-semibold text-body-tertiary fs-10 fs-sm-9"><span id="preview_size"></span> mb </h6>
-                                    </div>
-                                  </div>
-                                  <?php
-                                  }
-                                  ?>
-                                  
-                                </div>
-                              </div>
-                              
-                            </div>
-                          </div>
-                        </div>
-
-
-                </div>
-              </div>
+                  <div class="mb-3">
+                    <label for="class_post_photo_input" class="form-label">Ảnh</label>
+                    <input type="file" class="form-control" id="class_post_photo_input" accept="image/*" multiple>
+                    <div class="row g-2 mt-2" id="class_post_photos_preview"></div>
+                    <div id="class_post_files_inputs"></div>
+                  </div>  
 
 
 
@@ -266,6 +186,33 @@
 if (window.GLightbox) {
     GLightbox({ selector: '.class-post-photo' });
 }
+
+var loadingMorePosts = false;
+function maybeLoadMorePosts() {
+    var $feed = $('#class_posts_feed');
+    if (loadingMorePosts || $feed.data('has-more') != '1') return;
+    if ($(window).scrollTop() + $(window).height() < $(document).height() - 300) return;
+
+    loadingMorePosts = true;
+    $('#class_posts_loading').show();
+
+    $.ajax({
+        url: "{{ route('classes.posts.load', $class->id) }}",
+        type: 'GET',
+        data: { offset: $feed.data('offset'), last_date: $feed.data('last-date') },
+        success: function (res) {
+            $feed.append(res.html);
+            $feed.data('offset', res.next_offset);
+            $feed.data('has-more', res.has_more ? '1' : '0');
+            $feed.data('last-date', res.last_date);
+        },
+        complete: function () {
+            loadingMorePosts = false;
+            $('#class_posts_loading').hide();
+        }
+    });
+}
+$(window).on('scroll', maybeLoadMorePosts);
 
 $('#photo_id').on('change', function () {
     $.ajax({

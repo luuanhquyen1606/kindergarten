@@ -70,26 +70,13 @@ class ClassesController extends BaseController
         ->orderBy('students.name')
         ->get();
 
-        $posts = DB::table('post_class')
-        ->join('posts', 'posts.id', 'post_class.post_id')
-        ->leftJoin('users', 'users.id', 'posts.user_id')
-        ->select('posts.*', 'users.name as author_name', 'users.photo_id as author_photo_id')
-        ->where('post_class.class_id', $class->id)
-        ->where('posts.school_id', $school_id)
-        ->whereNull('posts.deleted_at')
-        ->orderBy('posts.created_at', 'desc')
-        ->get();
+        $postsPerPage = 1;
+        $posts = $this->getClassPosts($class->id, $school_id, 0, $postsPerPage + 1);
+        $hasMorePosts = $posts->count() > $postsPerPage;
+        $posts = $posts->take($postsPerPage)->values();
 
-        $postPhotos = DB::table('post_files')
-        ->join('files', 'files.id', 'post_files.file_id')
-        ->whereIn('post_files.post_id', $posts->pluck('id'))
-        ->select('post_files.post_id', 'files.id', 'files.path')
-        ->get()
-        ->groupBy('post_id');
-
-        foreach ($posts as $post) {
-            $post->photos = $postPhotos->get($post->id, collect());
-        }
+        $lastPostDate = null;
+        $postsHtml = $this->renderPostsFeed($class->id, $posts, $lastPostDate);
 
         $recent_photos = DB::table('post_class')
         ->join('posts', 'posts.id', 'post_class.post_id')
@@ -107,6 +94,9 @@ class ClassesController extends BaseController
         $data['class'] = $class;
         $data['students'] = $students;
         $data['posts'] = $posts;
+        $data['posts_html'] = $postsHtml;
+        $data['last_post_date'] = $lastPostDate;
+        $data['has_more_posts'] = $hasMorePosts;
         $data['recent_photos'] = $recent_photos;
         $data['today'] = $today;
         $data['present_count'] = $students->filter(fn($s) => $s->attendance_status == 'present')->count();
@@ -119,6 +109,108 @@ class ClassesController extends BaseController
 
         return view('admin.classes.show', $data);
     }
+    private function getClassPosts($classId, $school_id, $offset, $limit)
+    {
+        $posts = DB::table('post_class')
+        ->join('posts', 'posts.id', 'post_class.post_id')
+        ->leftJoin('users', 'users.id', 'posts.user_id')
+        ->select('posts.*', 'users.name as author_name', 'users.photo_id as author_photo_id')
+        ->where('post_class.class_id', $classId)
+        ->where('posts.school_id', $school_id)
+        ->whereNull('posts.deleted_at')
+        ->orderBy('posts.created_at', 'desc')
+        ->orderBy('posts.id', 'desc')
+        ->offset($offset)
+        ->limit($limit)
+        ->get();
+
+        $postPhotos = DB::table('post_files')
+        ->join('files', 'files.id', 'post_files.file_id')
+        ->whereIn('post_files.post_id', $posts->pluck('id'))
+        ->select('post_files.post_id', 'files.id', 'files.path')
+        ->get()
+        ->groupBy('post_id');
+
+        foreach ($posts as $post) {
+            $post->photos = $postPhotos->get($post->id, collect());
+        }
+
+        return $posts;
+    }
+
+    private function getAttendanceCounts($classId, $date)
+    {
+        $rows = DB::table('class_student')
+        ->join('students', 'students.id', 'class_student.student_id')
+        ->leftJoin('student_attendances', function ($join) use ($classId, $date) {
+            $join->on('student_attendances.student_id', 'students.id')
+                ->where('student_attendances.class_id', $classId)
+                ->where('student_attendances.date', $date);
+        })
+        ->where('class_student.class_id', $classId)
+        ->whereNull('students.deleted_at')
+        ->select('student_attendances.status as attendance_status')
+        ->get();
+
+        return [
+            'present' => $rows->filter(fn($r) => $r->attendance_status == 'present')->count(),
+            'absent' => $rows->filter(fn($r) => $r->attendance_status == 'absent')->count(),
+            'late' => $rows->filter(fn($r) => $r->attendance_status == 'late')->count(),
+            'excused' => $rows->filter(fn($r) => $r->attendance_status == 'excused')->count(),
+            'unmarked' => $rows->filter(fn($r) => in_array($r->attendance_status, ['unmarked', null]))->count(),
+        ];
+    }
+
+    private function renderPostsFeed($classId, $posts, &$lastDate)
+    {
+        $html = '';
+        foreach ($posts as $post) {
+            $date = \Carbon\Carbon::parse($post->created_at)->format('Y-m-d');
+            if ($date !== $lastDate) {
+                $html .= view('admin.classes._attendance_marker', [
+                    'class_id' => $classId,
+                    'date' => $date,
+                    'counts' => $this->getAttendanceCounts($classId, $date),
+                ])->render();
+                $lastDate = $date;
+            }
+            $html .= view('admin.classes._post_card', ['post' => $post])->render();
+        }
+        return $html;
+    }
+
+    public function loadPosts(Request $request, $id)
+    {
+        $school_id = $this->app['school']->id;
+
+        $class = DB::table('classes')
+        ->where('id', $id)
+        ->where('school_id', $school_id)
+        ->whereNull('deleted_at')
+        ->first();
+
+        if (!$class) {
+            abort(404);
+        }
+
+        $limit = 10;
+        $offset = max(0, (int) $request->get('offset', 0));
+        $lastDate = $request->get('last_date') ?: null;
+
+        $posts = $this->getClassPosts($class->id, $school_id, $offset, $limit + 1);
+        $hasMore = $posts->count() > $limit;
+        $posts = $posts->take($limit)->values();
+
+        $html = $this->renderPostsFeed($class->id, $posts, $lastDate);
+
+        return response()->json([
+            'html' => $html,
+            'has_more' => $hasMore,
+            'next_offset' => $offset + $posts->count(),
+            'last_date' => $lastDate,
+        ]);
+    }
+
     public function edit($id){
         $class = DB::table('classes')
         ->leftJoin('files','files.id','classes.photo_id')
