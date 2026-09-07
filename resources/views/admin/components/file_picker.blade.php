@@ -101,6 +101,7 @@
     function renderPreview() {
         $preview.empty();
         $inputs.empty();
+        console.log($preview);
         selected.forEach(function (file) {
             clone(previewTemplate)
                 .attr('data-file-id', file.id)
@@ -196,13 +197,21 @@
 
     $modal.on('show.bs.modal', function () {
         loadFiles(1);
-        //$modalToRestore = $('.modal.show').not(this);
+        $modalToRestore = $('.modal.show').not(this);
     });
 
     $modal.on('hidden.bs.modal', function () {
         
-        $('#create_class_post_modal').modal('show');
-
+        $('#edit_class_post_modal').modal('show');
+        /*
+        if (!$modalToRestore || !$modalToRestore.length) return;
+        bootstrap.Modal.getOrCreateInstance($modalToRestore[0]).show();
+        // The call above is a no-op if that modal still thinks it's shown internally
+        // (its state was never told it was hidden) - restore its visible state directly too.
+        $modalToRestore.addClass('show').css('display', 'block').attr('aria-modal', 'true').removeAttr('aria-hidden');
+        $('body').addClass('modal-open');
+        $modalToRestore = null;
+*/
         
 
 
@@ -212,6 +221,13 @@
 
     $root.on('picker:reset', function () {
         selected = [];
+        renderPreview();
+    });
+
+    // Lets a caller pre-populate the picker (e.g. with a post's existing media when editing it).
+    // Pass an array of {id, path} objects: $('#picker').trigger('picker:set', [files]);
+    $root.on('picker:set', function (e, files) {
+        selected = (files || []).map(function (f) { return { id: f.id, path: f.path }; });
         renderPreview();
     });
 })();

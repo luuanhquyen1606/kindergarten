@@ -159,7 +159,36 @@
               </form>
             </div>
           </div>
-        </div>  
+        </div>
+
+        <div class="modal fade" id="edit_class_post_modal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" style="max-width: 75vw;">
+            <div class="modal-content">
+              <form id="edit_class_post_form" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-header">
+                  <h5 class="modal-title">Sửa bài viết</h5>
+                  <button type="button" class="btn btn-close p-1" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div class="form-floating mb-3">
+                    <textarea class="form-control" name="content" id="edit_class_post_content" style="height: 120px" required></textarea>
+                    <label for="edit_class_post_content">Nội dung</label>
+                    <div class="invalid-feedback"></div>
+                  </div>
+
+                  @include('admin.components.file_picker', ['id' => 'edit_class_post_files', 'name' => 'files', 'label' => 'Thêm file, ảnh cho bài viết'])
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-phoenix-secondary" data-bs-dismiss="modal">Hủy</button>
+                  <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+@include('admin.pages.media_browser')
 @endsection
 
 @section('js')
@@ -205,7 +234,61 @@ $('#photo_id').on('change', function () {
 
 
 
+$('#create_class_post_modal').on('hidden.bs.modal', function () {
+    $('#create_class_post_form')[0].reset();
+    $('#class_post_files').trigger('picker:reset');
+    $('.invalid-feedback').html('');
+    $('#create_class_post_form .form-control').removeClass('is-invalid');
+});
+
 $('#create_class_post_form').on('submit', function (e) {
+    e.preventDefault();
+    var $form = $(this);
+    $('.invalid-feedback').html('');
+    $form.find('.form-control').removeClass('is-invalid');
+
+    $.ajax({
+        url: $form.attr('action'),
+        type: 'POST',
+        data: $form.serialize(),
+        success: function () {
+            window.location.reload();
+        },
+        error: function (xhr) {
+            if (xhr.status === 422) {
+                var errors = xhr.responseJSON.errors;
+                $.each(errors, function (field, msgs) {
+                    $("[name='" + field + "']").addClass('is-invalid');
+                    $("[name='" + field + "']").siblings('.invalid-feedback').html(msgs[0]);
+                });
+            }
+        }
+    });
+});
+
+$(document).on('click', '.edit-class-post', function (e) {
+    e.preventDefault();
+    var postId = $(this).data('post-id');
+
+    $.getJSON('{{ url('/admin/classes/'.$class->id.'/posts') }}/' + postId + '/edit', function (res) {
+        $('#edit_class_post_form').attr('action', '{{ url('/admin/classes/'.$class->id.'/posts') }}/' + postId);
+        $('#edit_class_post_content').val(res.content);
+        $('#edit_class_post_content').val("anh quyen dep zai");
+        $('#edit_class_post_files').trigger('picker:set', [res.files]);
+        $('#edit_class_post_modal').modal('show');
+    });
+});
+
+$('#edit_class_post_modal').on('hidden.bs.modal', function () {
+  /*
+    $('#edit_class_post_form')[0].reset();
+    $('#edit_class_post_files').trigger('picker:reset');
+    $('.invalid-feedback').html('');
+    $('#edit_class_post_form .form-control').removeClass('is-invalid');
+    */
+});
+
+$('#edit_class_post_form').on('submit', function (e) {
     e.preventDefault();
     var $form = $(this);
     $('.invalid-feedback').html('');

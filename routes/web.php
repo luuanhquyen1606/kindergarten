@@ -42,6 +42,8 @@ Route::middleware([
     Route::post('/admin/classes/{class}/photo', [ClassesController::class, 'updatePhoto'])->whereNumber('class')->name('classes.updatePhoto');
     Route::get('/admin/classes/{class}/posts/load', [ClassesController::class, 'loadPosts'])->whereNumber('class')->name('classes.posts.load');
     Route::post('/admin/classes/{class}/posts', [ClassesController::class, 'storePost'])->whereNumber('class')->name('classes.posts.store');
+    Route::get('/admin/classes/{class}/posts/{post}/edit', [ClassesController::class, 'editPost'])->whereNumber(['class', 'post'])->name('classes.posts.edit');
+    Route::put('/admin/classes/{class}/posts/{post}', [ClassesController::class, 'updatePost'])->whereNumber(['class', 'post'])->name('classes.posts.update');
     Route::delete('/admin/classes/{class}/posts/{post}', [ClassesController::class, 'destroyPost'])->whereNumber(['class', 'post'])->name('classes.posts.destroy');
     Route::get('/admin/attendance', [AttendancesController::class, 'index'])->name('attendances.index');
     Route::get('/admin/attendance/{class_id}', [AttendancesController::class, 'show'])->whereNumber('class_id')->name('attendances.show');

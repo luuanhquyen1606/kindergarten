@@ -10,7 +10,10 @@
       </div>
       <div class="btn-reveal-trigger">
         <button class="btn btn-sm dropdown-toggle dropdown-caret-none transition-none d-flex btn-reveal" type="button" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false" data-bs-reference="parent"><span class="fas fa-ellipsis-h"></span></button>
-        <div class="dropdown-menu dropdown-menu-end py-2"><a class="dropdown-item text-danger delete-class-post" href="#!" data-post-id="{{ $post->id }}">Xóa</a></div>
+        <div class="dropdown-menu dropdown-menu-end py-2">
+          <a class="dropdown-item edit-class-post" href="#!" data-post-id="{{ $post->id }}">Sửa</a>
+          <a class="dropdown-item text-danger delete-class-post" href="#!" data-post-id="{{ $post->id }}">Xóa</a>
+      </div>
       </div>
     </div>
     <p class="text-body-secondary mb-3" style="white-space: pre-line;">{{ $post->content }}</p>

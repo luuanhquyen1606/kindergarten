@@ -427,6 +427,106 @@ class ClassesController extends BaseController
                      ->with('success', 'Đã đăng bài viết!');
     }
 
+    public function editPost(Request $request, $id, $postId)
+    {
+        $school_id = $this->app['school']->id;
+
+        $post = DB::table('post_class')
+        ->join('posts', 'posts.id', 'post_class.post_id')
+        ->where('post_class.class_id', $id)
+        ->where('posts.id', $postId)
+        ->where('posts.school_id', $school_id)
+        ->whereNull('posts.deleted_at')
+        ->select('posts.*')
+        ->first();
+
+        if (!$post) {
+            abort(404);
+        }
+
+        $files = DB::table('post_files')
+        ->join('files', 'files.id', 'post_files.file_id')
+        ->where('post_files.post_id', $post->id)
+        ->select('files.id', 'files.path')
+        ->get();
+
+        return response()->json([
+            'content' => $post->content,
+            'files' => $files,
+        ]);
+    }
+
+    public function updatePost(Request $request, $id, $postId)
+    {
+        $school_id = $this->app['school']->id;
+
+        $belongsToClass = DB::table('post_class')
+        ->where('class_id', $id)
+        ->where('post_id', $postId)
+        ->exists();
+
+        if (!$belongsToClass) {
+            abort(404);
+        }
+
+        $post = DB::table('posts')
+        ->where('id', $postId)
+        ->where('school_id', $school_id)
+        ->whereNull('deleted_at')
+        ->first();
+
+        if (!$post) {
+            abort(404);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'content' => 'required|string',
+            'files' => 'nullable|array',
+            'files.*' => 'nullable|exists:files,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $title = Str::limit(trim(strip_tags($request->get('content'))), 60, '');
+
+        DB::table('posts')
+        ->where('id', $post->id)
+        ->update([
+            'title' => $title !== '' ? $title : 'Cập nhật lớp học',
+            'content' => $request->get('content'),
+            'updated_at' => now(),
+        ]);
+
+        $fileIds = array_filter($request->get('files', []));
+
+        DB::table('post_files')
+        ->where('post_id', $post->id)
+        ->whereNotIn('file_id', $fileIds)
+        ->delete();
+
+        foreach ($fileIds as $fileId) {
+            DB::table('post_files')->insertOrIgnore([
+                'post_id' => $post->id,
+                'file_id' => $fileId,
+                'school_id' => $school_id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        if ($request->ajax()) {
+            return response()->json(['status' => 'ok']);
+        }
+
+        return redirect()->route('classes.show', $id)
+                     ->with('success', 'Đã cập nhật bài viết!');
+    }
+
     public function destroyPost(Request $request, $id, $postId)
     {
         $school_id = $this->app['school']->id;
