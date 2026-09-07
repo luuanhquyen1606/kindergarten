@@ -273,7 +273,6 @@ $(document).on('click', '.edit-class-post', function (e) {
     $.getJSON('{{ url('/admin/classes/'.$class->id.'/posts') }}/' + postId + '/edit', function (res) {
         $('#edit_class_post_form').attr('action', '{{ url('/admin/classes/'.$class->id.'/posts') }}/' + postId);
         $('#edit_class_post_content').val(res.content);
-        $('#edit_class_post_content').val("anh quyen dep zai");
         $('#edit_class_post_files').trigger('picker:set', [res.files]);
         $('#edit_class_post_modal').modal('show');
     });
