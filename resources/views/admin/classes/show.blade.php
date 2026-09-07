@@ -148,27 +148,7 @@
                   </div>
 
 
-
-
-
-
-                  <div class="mb-3">
-                    <label for="class_post_photo_input" class="form-label">Ảnh</label>
-                    <input type="file" class="form-control" id="class_post_photo_input" accept="image/*" multiple>
-                    <div class="row g-2 mt-2" id="class_post_photos_preview"></div>
-                    <div id="class_post_files_inputs"></div>
-                  </div>  
-
-
-
-              
-
-              
-
-                  
-                  
-                  
-                  <div id="class_post_upload_status" class="fs-10 text-body-tertiary mt-2"></div>
+                  @include('admin.components.file_picker', ['id' => 'class_post_files', 'name' => 'files', 'label' => 'Thêm file, ảnh cho bài viết'])
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-phoenix-secondary" data-bs-dismiss="modal">Hủy</button>
@@ -177,8 +157,7 @@
               </form>
             </div>
           </div>
-        </div>
-@include('admin.pages.media_browser')
+        </div>  
 @endsection
 
 @section('js')
@@ -222,53 +201,9 @@ $('#photo_id').on('change', function () {
     });
 });
 
-function uploadClassPostPhoto(file) {
-    var formData = new FormData();
-    formData.append('file', file);
-
-    $('#class_post_upload_status').text('Đang tải ảnh lên...');
-
-    $.ajax({
-        url: "{{ route('file_upload') }}",
-        type: 'POST',
-        data: formData,
-        processData: false,
-        contentType: false,
-        success: function (res) {
-            $('#class_post_files_inputs').append('<input type="hidden" name="files[]" value="' + res.id + '">');
-            $('#class_post_photos_preview').append(
-                '<div class="col-4 position-relative" data-file-id="' + res.id + '">' +
-                    '<img class="rounded w-100" style="height:90px;object-fit:cover" src="' + res.path + '" alt="">' +
-                    '<button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 remove-class-post-photo" style="padding:2px 6px;"><span class="fas fa-times"></span></button>' +
-                '</div>'
-            );
-        },
-        complete: function () {
-            $('#class_post_upload_status').text('');
-        }
-    });
-}
-
-$('#class_post_photo_input').on('change', function () {
-    var files = this.files;
-    for (var i = 0; i < files.length; i++) {
-        uploadClassPostPhoto(files[i]);
-    }
-    $(this).val('');
-});
-
-$(document).on('click', '.remove-class-post-photo', function () {
-    var $col = $(this).closest('[data-file-id]');
-    var fileId = $col.data('file-id');
-    $('#class_post_files_inputs input[value="' + fileId + '"]').remove();
-    $col.remove();
-});
-
 $('#create_class_post_modal').on('hidden.bs.modal', function () {
     $('#create_class_post_form')[0].reset();
-    $('#class_post_photos_preview').empty();
-    $('#class_post_files_inputs').empty();
-    $('#class_post_upload_status').text('');
+    $('#class_post_files').trigger('picker:reset');
     $('.invalid-feedback').html('');
     $('#create_class_post_form .form-control').removeClass('is-invalid');
 });
