@@ -215,6 +215,9 @@ function maybeLoadMorePosts() {
             $feed.data('offset', res.next_offset);
             $feed.data('has-more', res.has_more ? '1' : '0');
             $feed.data('last-date', res.last_date);
+            if (window.GLightbox) {
+                GLightbox({ selector: '.class-post-photo' });
+            }
         },
         complete: function () {
             loadingMorePosts = false;
@@ -271,7 +274,9 @@ $(document).on('click', '.edit-class-post', function (e) {
     var postId = $(this).data('post-id');
 
     $.getJSON('{{ url('/admin/classes/'.$class->id.'/posts') }}/' + postId + '/edit', function (res) {
-        $('#edit_class_post_form').attr('action', '{{ url('/admin/classes/'.$class->id.'/posts') }}/' + postId);
+        var $form = $('#edit_class_post_form');
+        $form.attr('action', '{{ url('/admin/classes/'.$class->id.'/posts') }}/' + postId);
+        $form.data('post-id', postId);
         $('#edit_class_post_content').val(res.content);
         $('#edit_class_post_files').trigger('picker:set', [res.files]);
         $('#edit_class_post_modal').modal('show');
@@ -279,17 +284,18 @@ $(document).on('click', '.edit-class-post', function (e) {
 });
 
 $('#edit_class_post_modal').on('hidden.bs.modal', function () {
-  /*
+/*
     $('#edit_class_post_form')[0].reset();
     $('#edit_class_post_files').trigger('picker:reset');
     $('.invalid-feedback').html('');
     $('#edit_class_post_form .form-control').removeClass('is-invalid');
-    */
+    */ 
 });
 
 $('#edit_class_post_form').on('submit', function (e) {
     e.preventDefault();
     var $form = $(this);
+    var postId = $form.data('post-id');
     $('.invalid-feedback').html('');
     $form.find('.form-control').removeClass('is-invalid');
 
@@ -297,8 +303,12 @@ $('#edit_class_post_form').on('submit', function (e) {
         url: $form.attr('action'),
         type: 'POST',
         data: $form.serialize(),
-        success: function () {
-            window.location.reload();
+        success: function (res) {
+            $('#class_post_' + postId).replaceWith(res.html);
+            $('#edit_class_post_modal').modal('hide');
+            if (window.GLightbox) {
+                GLightbox({ selector: '.class-post-photo' });
+            }
         },
         error: function (xhr) {
             if (xhr.status === 422) {

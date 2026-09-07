@@ -519,8 +519,25 @@ class ClassesController extends BaseController
             ]);
         }
 
+        $updatedPost = DB::table('post_class')
+        ->join('posts', 'posts.id', 'post_class.post_id')
+        ->leftJoin('users', 'users.id', 'posts.user_id')
+        ->select('posts.*', 'users.name as author_name', 'users.photo_id as author_photo_id')
+        ->where('post_class.class_id', $id)
+        ->where('posts.id', $post->id)
+        ->first();
+
+        $updatedPost->photos = DB::table('post_files')
+        ->join('files', 'files.id', 'post_files.file_id')
+        ->where('post_files.post_id', $updatedPost->id)
+        ->select('files.id', 'files.path')
+        ->get();
+
         if ($request->ajax()) {
-            return response()->json(['status' => 'ok']);
+            return response()->json([
+                'status' => 'ok',
+                'html' => view('admin.classes._post_card', ['post' => $updatedPost])->render(),
+            ]);
         }
 
         return redirect()->route('classes.show', $id)
