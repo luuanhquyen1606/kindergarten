@@ -13,7 +13,7 @@ class MediasController extends BaseController
     public function index(Request $request)    
     {  
 
-        $per_page=48;       
+        $per_page=12;       
          $posts = DB::table('files')
         ->where('files.school_id', $this->app['school']->id)->orderBy('id', 'desc')->paginate($per_page)->through(function ($item) {
             $item->srcset = getImageSet($item->thumbnail);

@@ -82,8 +82,8 @@
     var $inputs = $root.find('[data-inputs]');
     var previewTemplate = $root.find('[data-preview-template]')[0];
     var gridTemplate = $root.find('[data-grid-template]')[0];
-    // Moved to <body> so it isn't a DOM descendant of another modal (e.g. create_class_post_modal) -
-    // Bootstrap does not support showing a modal nested inside another one.
+    // Moved to <body> so it isn't a DOM descendant of another modal (e.g. create_class_post_modal),
+    // keeping it in the same stacking context and safely above it regardless of the page layout.
     var $modal = $root.find('#{{ $id }}_modal').appendTo(document.body);
     var $grid = $modal.find('[data-grid]');
     var $pagination = $modal.find('[data-pagination]');
@@ -110,7 +110,7 @@
         });
     }
 
-    function renderGrid(files) {
+    function renderGrid(files) { 
         $grid.empty();
         files.forEach(function (file) {
             clone(gridTemplate)
@@ -188,21 +188,26 @@
         });
     });
 
-    // Bootstrap doesn't natively support stacking one modal on top of another: without this,
-    // opening this modal from inside another shown modal hides that other modal behind this
-    // one's backdrop, and closing this one leaves it hidden. Bump this modal (and its own,
-    // just-created backdrop) above the already-open modal instead of letting it take over.
+    // Bootstrap doesn't support one modal shown on top of another: opening this one from
+    // inside another already-shown modal leaves that other modal hidden/broken behind it.
+    // Remember whichever modal was open when this one was triggered, and explicitly bring
+    // it back once this one closes.
+    var $modalToRestore = null;
+
     $modal.on('show.bs.modal', function () {
         loadFiles(1);
-        $(this).css('z-index', 1060);
+        //$modalToRestore = $('.modal.show').not(this);
     });
-    $modal.on('shown.bs.modal', function () {
-        $('.modal-backdrop').last().css('z-index', 1059);
-    });
+
     $modal.on('hidden.bs.modal', function () {
-        if ($('.modal.show').length) {
-            $('body').addClass('modal-open');
-        }
+        
+        $('#create_class_post_modal').modal('show');
+
+        
+
+
+
+        
     });
 
     $root.on('picker:reset', function () {

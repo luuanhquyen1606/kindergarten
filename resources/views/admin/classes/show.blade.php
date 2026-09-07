@@ -125,7 +125,7 @@
           </div>
         </div>
 
-        <div class="modal fade" id="create_class_post_modal" tabindex="-1" aria-hidden="true">
+        <div class="modal fade " id="create_class_post_modal" tabindex="-1" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered" style="max-width: 75vw;">
             <div class="modal-content">
               <form id="create_class_post_form" action="{{ route('classes.posts.store', $class->id) }}" method="POST">
@@ -149,6 +149,8 @@
 
 
                   @include('admin.components.file_picker', ['id' => 'class_post_files', 'name' => 'files', 'label' => 'Thêm file, ảnh cho bài viết'])
+               
+               
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-phoenix-secondary" data-bs-dismiss="modal">Hủy</button>
@@ -201,12 +203,7 @@ $('#photo_id').on('change', function () {
     });
 });
 
-$('#create_class_post_modal').on('hidden.bs.modal', function () {
-    $('#create_class_post_form')[0].reset();
-    $('#class_post_files').trigger('picker:reset');
-    $('.invalid-feedback').html('');
-    $('#create_class_post_form .form-control').removeClass('is-invalid');
-});
+
 
 $('#create_class_post_form').on('submit', function (e) {
     e.preventDefault();
