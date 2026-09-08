@@ -179,6 +179,51 @@ class ClassesController extends BaseController
 
         return response()->download($zipPath, $zipName)->deleteFileAfterSend(true);
     }
+    public function downloadPhoto($id, $postId, $fileId)
+    {
+        $school_id = $this->app['school']->id;
+
+        $class = DB::table('classes')
+        ->where('id', $id)
+        ->where('school_id', $school_id)
+        ->whereNull('deleted_at')
+        ->first();
+
+        if (!$class) {
+            abort(404);
+        }
+
+        $belongsToAlbum = DB::table('post_class')
+        ->join('posts', 'posts.id', 'post_class.post_id')
+        ->where('post_class.class_id', $class->id)
+        ->where('posts.id', $postId)
+        ->where('posts.school_id', $school_id)
+        ->whereNull('posts.deleted_at')
+        ->exists();
+
+        if (!$belongsToAlbum) {
+            abort(404);
+        }
+
+        $photo = DB::table('post_files')
+        ->join('files', 'files.id', 'post_files.file_id')
+        ->where('post_files.post_id', $postId)
+        ->where('files.id', $fileId)
+        ->select('files.path', 'files.original_name')
+        ->first();
+
+        if (!$photo) {
+            abort(404);
+        }
+
+        $filePath = public_path($photo->path);
+
+        if (!file_exists($filePath)) {
+            abort(404);
+        }
+
+        return response()->download($filePath, $photo->original_name ?: basename($photo->path));
+    }
     public function show($id)
     {
         $school_id = $this->app['school']->id;
@@ -731,5 +776,3 @@ class ClassesController extends BaseController
                             ->with('success', 'Level deleted successfully.');
     }
 }
-
-

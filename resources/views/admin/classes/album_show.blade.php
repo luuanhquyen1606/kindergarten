@@ -28,14 +28,19 @@
   <div class="position-relative">
     <div class="row gx-7 gy-5 overflow-hidden" id="image_gallery" data-gallery-column="data-gallery-column" data-sl-isotope='{"layoutMode":"packery"}'>
       @forelse($album->photos as $photo)
-      <a class="col-sm-6 col-md-4 col-xl-3 isotope-item img-zoom-hover text-decoration-none class-album-photo" href="<?php echo getPhotoThumbnail($photo->id, 1200); ?>" data-gallery="album-{{ $album->id }}">
-        <div class="overflow-hidden rounded"><img class="img-fluid" src="<?php echo getPhotoThumbnail($photo->id, 500); ?>" alt="" /></div>
-        <div class="d-flex mt-3">
-          <div>
-            <h5 class="title text-truncate">{{ \Illuminate\Support\Str::limit($photo->original_name, 25) }}</h5>
+      <div class="col-sm-6 col-md-4 col-xl-3 isotope-item img-zoom-hover">
+        <a class="text-decoration-none class-album-photo" href="<?php echo getPhotoThumbnail($photo->id, 1200); ?>" data-gallery="album-{{ $album->id }}">
+          <div class="overflow-hidden rounded"><img class="img-fluid" src="<?php echo getPhotoThumbnail($photo->id, 500); ?>" alt="" /></div>
+        </a>
+        <div class="d-flex align-items-center mt-3">
+          <div class="flex-1 text-truncate">
+            <h5 class="title text-truncate mb-0">{{ \Illuminate\Support\Str::limit($photo->original_name, 25) }}</h5> 
           </div>
+          <a class="btn btn-sm btn-phoenix-secondary p-1 lh-1 ms-2" href="{{ route('classes.albums.photos.download', [$class->id, $album->id, $photo->id]) }}" title="Tải xuống">
+            <span class="fas fa-download"></span>
+          </a>
         </div>
-      </a>
+      </div>
       @empty
       <div class="col-12">
         <div class="card">
