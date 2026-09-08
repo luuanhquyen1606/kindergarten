@@ -74,6 +74,8 @@ Route::middleware([
     Route::resource('/admin/parents', ParentsController::class)->only(['index', 'show', 'create', 'store', 'destroy','edit','update']);
     Route::resource('/admin/emails', EmailsController::class)->only(['index', 'show', 'create', 'store', 'destroy','edit','update']);
     Route::resource('/admin/posts', PostsController::class)->only(['index', 'show', 'create', 'store', 'destroy','edit','update']);
+    Route::patch('/admin/posts/{id}/toggle-publish', [PostsController::class, 'togglePublish'])->whereNumber('id')->name('posts.togglePublish');
+    Route::post('/admin/posts/bulk-delete', [PostsController::class, 'bulkDestroy'])->name('posts.bulkDestroy');
     // Events now live inside the posts manager (posts.type = 'event'); keep old links working.
     Route::get('/admin/events', fn () => redirect('/admin/posts?type=event'));
     Route::get('/admin/events/create', fn () => redirect('/admin/posts/create?type=event'));

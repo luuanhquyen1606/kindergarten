@@ -1,7 +1,7 @@
 @extends('admin.layouts.app')
 @section('content')
 
- <form class="ajax_form" action="/admin/posts" class="mb-9" method="POST" >
+ <form class="ajax_form mb-9" action="/admin/posts" method="POST" >
 
 
 
@@ -36,6 +36,13 @@
                     <input  class="form-control" type="text" name="title" id="create-boardwizard-name" placeholder="Tiêu đề bài viết" value="">
                     <label for="create-boardwizard-name">Tiêu đề bài viết</label>
                    <div class="invalid-feedback"></div>
+                </div>
+              </div>
+              <div class="col-sm-12 col-md-12" style="margin-top:10px">
+                <div class="form-floating">
+                    <textarea class="form-control" name="summary" id="post_summary" placeholder="Tóm tắt ngắn" style="height:80px"></textarea>
+                    <label for="post_summary">Tóm tắt (hiển thị ở trang danh sách)</label>
+                    <div class="invalid-feedback"></div>
                 </div>
               </div>
               <div class="col-sm-12 col-md-12">
@@ -185,11 +192,22 @@
                 <div class="col-12 col-xl-12">
                   <div class="card mb-3">
                     <div class="card-body">
-                      
+                      <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" role="switch" id="is_published" name="is_published" value="1" checked>
+                        <label class="form-check-label" for="is_published">Xuất bản ngay</label>
+                      </div>
+                      <p class="fs-10 text-body-tertiary mb-0 mt-1">Bỏ chọn để lưu dưới dạng bản nháp, chưa hiển thị công khai.</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12 col-xl-12">
+                  <div class="card mb-3">
+                    <div class="card-body">
+
                       <div class="row gx-3">
                         <div class="col-12 col-sm-6 col-xl-12">
                           <div class="mb-4">
-                            <h5 class="mb-3">Ảnh đại diện bài viết</h5> 
+                            <h5 class="mb-3">Ảnh đại diện bài viết</h5>
                             <div id="feature_file" class="d-flex align-items-end position-relative">
                                 <input class="d-none"  id="feature_file_browser" type="file" />
                                 
