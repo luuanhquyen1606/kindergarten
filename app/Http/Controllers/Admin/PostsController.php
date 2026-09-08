@@ -52,6 +52,32 @@ class PostsController extends BaseController
      * group can behave similarly. Strip those out before validating so the
      * exists() rules below only ever see real ids.
      */
+    /**
+     * Quill stores content as HTML paragraphs. Pull the text out of the
+     * first non-empty <p> so it can be stored as a plain-text summary.
+     */
+    private function extractSummary(?string $content): ?string
+    {
+        if (!$content) {
+            return null;
+        }
+
+        if (preg_match_all('/<p[^>]*>(.*?)<\/p>/is', $content, $matches)) {
+            foreach ($matches[1] as $paragraph) {
+                $text = trim(html_entity_decode(strip_tags($paragraph), ENT_QUOTES, 'UTF-8'));
+                if ($text !== '') {
+                    return $text;
+                }
+            }
+
+            return null;
+        }
+
+        $text = trim(html_entity_decode(strip_tags($content), ENT_QUOTES, 'UTF-8'));
+
+        return $text !== '' ? $text : null;
+    }
+
     private function stripEmptySelections(Request $request): void
     {
         $request->merge([
@@ -301,6 +327,7 @@ class PostsController extends BaseController
         ->update([
                 'title' => $request->get('title'),
                 'content' => $request->get('content'),
+                'summary' => $this->extractSummary($request->get('content')),
                 'photo_id' => $request->get('photo_id'),
                 'category_id'=> $type === 'news' ? $request->get('category_id') : null,
                 'is_published' => $request->boolean('is_published') ? 1 : 0,
@@ -399,6 +426,7 @@ class PostsController extends BaseController
         $post_id=DB::table('posts')->insertGetId([
         'title' => $request->get('title'),
         'content' => $request->get('content'),
+        'summary' => $this->extractSummary($request->get('content')),
         'type' => $type,
         'category_id' => $type === 'news' ? $request->get('category_id') : null,
         'school_id' => $schoolId,

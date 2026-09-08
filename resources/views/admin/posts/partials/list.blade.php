@@ -132,10 +132,10 @@
                       <td class="align-middle white-space-nowrap pe-5">{{ \Carbon\Carbon::parse($post->created_at)->format('d/m/Y') }}</td>
 
                       <td class="align-middle actions text-end pe-3">
-                        <a href="/admin/posts/{{ $post->id }}" class="btn btn-link text-body-quaternary p-0 me-2" title="Xem chi tiết">
+                        <a href="/admin/posts/{{ $post->id }}" class="btn btn-link text-body-quaternary p-0 me-2 js-no-ajax-nav" title="Xem chi tiết">
                           <span class="fas fa-eye text-body"></span>
                         </a>
-                        <a href="/admin/posts/{{ $post->id }}/edit" class="btn btn-link text-body-quaternary p-0 me-2" title="Chỉnh sửa">
+                        <a href="/admin/posts/{{ $post->id }}/edit" class="btn btn-link text-body-quaternary p-0 me-2 js-no-ajax-nav" title="Chỉnh sửa">
                          <span class="fas fa-edit text-body"></span>
                         </a>
                         <button type="button" class="btn btn-link text-body-quaternary p-0 text-danger js-delete-post" data-id="{{ $post->id }}" data-title="{{ $post->title }}" title="Xóa">
