@@ -2,6 +2,8 @@
     $id = $id ?? 'file_picker_' . uniqid();
     $name = $name ?? 'files';
     $label = $label ?? 'Chọn file';
+    $multiple = $multiple ?? true;
+    $initial = $initial ?? [];
 @endphp
 
 <style>
@@ -59,7 +61,7 @@
                         <label class="btn btn-primary w-100 mb-0" for="{{ $id }}_upload_input">
                             <span class="fas fa-plus me-2"></span>Tải lên mới
                         </label>
-                        <input class="d-none" id="{{ $id }}_upload_input" type="file" accept="image/*,video/*" multiple>
+                        <input class="d-none" id="{{ $id }}_upload_input" type="file" accept="image/*,video/*" {{ $multiple ? 'multiple' : '' }}>
                     </div>
                     <div class="row g-3" data-grid></div>
                     <div class="d-flex justify-content-center mt-3">
@@ -88,7 +90,10 @@
     var $grid = $modal.find('[data-grid]');
     var $pagination = $modal.find('[data-pagination]');
 
-    var selected = [];
+    var multiple = {{ $multiple ? 'true' : 'false' }};
+    var selected = {!! json_encode(array_map(function ($f) {
+        return ['id' => $f['id'], 'path' => $f['path']];
+    }, $initial)) !!};
 
     function clone(tpl) {
         return $(document.importNode(tpl.content, true).firstElementChild);
@@ -101,14 +106,19 @@
     function renderPreview() {
         $preview.empty();
         $inputs.empty();
-        console.log($preview);
         selected.forEach(function (file) {
             clone(previewTemplate)
                 .attr('data-file-id', file.id)
                 .find('img').attr('src', file.path).end()
                 .appendTo($preview);
-            $('<input type="hidden">').attr('name', name + '[]').val(file.id).appendTo($inputs);
         });
+        if (multiple) {
+            selected.forEach(function (file) {
+                $('<input type="hidden">').attr('name', name + '[]').val(file.id).appendTo($inputs);
+            });
+        } else {
+            $('<input type="hidden">').attr('name', name).val(selected.length ? selected[0].id : '').appendTo($inputs);
+        }
     }
 
     function renderGrid(files) { 
@@ -152,12 +162,18 @@
 
     $grid.on('click', '.files', function () {
         var id = $(this).data('id');
-        var index = selected.findIndex(function (f) { return f.id == id; });
-        if (index > -1) {
-            selected.splice(index, 1);
-            $(this).removeClass('selected');
+        if (multiple) {
+            var index = selected.findIndex(function (f) { return f.id == id; });
+            if (index > -1) {
+                selected.splice(index, 1);
+                $(this).removeClass('selected');
+            } else {
+                selected.push({ id: id, path: $(this).find('img').attr('src') });
+                $(this).addClass('selected');
+            }
         } else {
-            selected.push({ id: id, path: $(this).find('img').attr('src') });
+            selected = [{ id: id, path: $(this).find('img').attr('src') }];
+            $grid.find('.files').removeClass('selected');
             $(this).addClass('selected');
         }
         renderPreview();
@@ -177,12 +193,18 @@
 
     $root.find('#{{ $id }}_upload_input').on('change', function () {
         var $input = $(this);
+        if (!multiple) {
+            selected = [];
+        }
         var uploads = $.map(this.files, function (file) {
             return uploadFile(file).done(function (result) {
                 selected.push({ id: result.id, path: result.path });
             });
         });
         $.when.apply($, uploads).always(function () {
+            if (!multiple && selected.length > 1) {
+                selected = [selected[selected.length - 1]];
+            }
             renderPreview();
             loadFiles(1);
             $input.val('');
@@ -230,5 +252,7 @@
         selected = (files || []).map(function (f) { return { id: f.id, path: f.path }; });
         renderPreview();
     });
+
+    renderPreview();
 })();
 </script>

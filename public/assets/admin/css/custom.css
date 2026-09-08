@@ -3,6 +3,7 @@
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
     border-color: #ccc;
+    min-height: 250px;
 }
 .quill_editor {
 border-bottom-left-radius: 8px;

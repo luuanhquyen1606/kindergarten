@@ -52,10 +52,6 @@ $post_href = $post->type === 'event' ? '/su-kien-'.$post->slug : '/'.$post->rout
 
       <div class="card">
         <div class="card-body">
-          @if($post->summary)
-            <p class="text-body-tertiary fst-italic">{{ $post->summary }}</p>
-            <hr>
-          @endif
           <div class="post-content">
             {!! $post->content !!}
           </div>

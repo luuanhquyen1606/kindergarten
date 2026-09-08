@@ -65,7 +65,6 @@ class PostsController extends BaseController
         $rules = [
             'title' => 'required|string|max:256',
             'content' => 'required',
-            'summary' => 'nullable|string|max:1000',
             'photo_id' => ['required', Rule::exists('files', 'id')->where('school_id', $schoolId)],
             'is_published' => 'nullable|boolean',
             'tags' => 'nullable|array',
@@ -302,7 +301,6 @@ class PostsController extends BaseController
         ->update([
                 'title' => $request->get('title'),
                 'content' => $request->get('content'),
-                'summary' => $request->get('summary'),
                 'photo_id' => $request->get('photo_id'),
                 'category_id'=> $type === 'news' ? $request->get('category_id') : null,
                 'is_published' => $request->boolean('is_published') ? 1 : 0,
@@ -314,20 +312,21 @@ class PostsController extends BaseController
             $this->saveEventMeta($id, $request, $schoolId);
         }
 
-        if($request->get('files'))
-        {
-            foreach($request->get('files') as $file){
-                if($file)
-                {
-                    DB::table('post_files')->insertOrIgnore([
-                        'post_id' => $id,
-                        'file_id' => $file,
-                        'school_id'=>$schoolId,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-                }
-            };
+        $fileIds = array_filter($request->get('files', []));
+
+        DB::table('post_files')
+            ->where('post_id', $id)
+            ->whereNotIn('file_id', $fileIds)
+            ->delete();
+
+        foreach ($fileIds as $file) {
+            DB::table('post_files')->insertOrIgnore([
+                'post_id' => $id,
+                'file_id' => $file,
+                'school_id'=>$schoolId,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
         }
         // delete old tags
         DB::table('posts_tags')->where('post_id', $id)->where('school_id', $schoolId)->delete();
@@ -347,19 +346,6 @@ class PostsController extends BaseController
                 }
             };
         }
-        if($request->get('deleted_files'))
-        {
-            foreach($request->get('deleted_files') as $file){
-                if($file)
-                {
-                    DB::table('post_files')
-                    ->where('file_id', $file)
-                    ->where('post_id', $id)
-                    ->delete();
-                }
-            };
-        }
-
         if ($type === 'news') {
             $post = DB::table('posts')
             ->where('posts.id', $id)
@@ -413,7 +399,6 @@ class PostsController extends BaseController
         $post_id=DB::table('posts')->insertGetId([
         'title' => $request->get('title'),
         'content' => $request->get('content'),
-        'summary' => $request->get('summary'),
         'type' => $type,
         'category_id' => $type === 'news' ? $request->get('category_id') : null,
         'school_id' => $schoolId,
