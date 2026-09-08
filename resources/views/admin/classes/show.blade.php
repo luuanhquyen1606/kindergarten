@@ -33,13 +33,13 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-auto">
+                <div class="col-auto"> 
                   <div class="row g-2">
                     @if(!$attendance_taken_today)
                     <div class="col-auto order-xxl-2"><a class="btn btn-primary lh-1" href="{{ route('attendances.show', $class->id) }}"><span class="fa-solid fa-user-plus me-2"></span>Điểm danh</a></div>
                     @endif
                     <div class="col-auto order-xxl-1">
-                      <a class="btn btn-phoenix-primary lh-1" href="{{ route('classes.albums', $class->id) }}"><span class="fa-solid fa-album me-2"></span> Album</a>
+                      <a class="btn btn-phoenix-primary lh-1" href="{{ route('classes.albums', $class->id) }}"><span class="fa-solid fa-images me-2"></span> Album</a>
                     </div>
                     <div class="col-auto">
                       <div class="position-static"><button class="btn btn-phoenix-secondary lh-1" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false" data-bs-reference="parent"><span class="fa-solid fa-chevron-down me-2"></span> More</button>
