@@ -33,7 +33,7 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-auto"> 
+                <div class="col-auto">    
                   <div class="row g-2">
                     @if(!$attendance_taken_today)
                     <div class="col-auto order-xxl-2"><a class="btn btn-primary lh-1" href="{{ route('attendances.show', $class->id) }}"><span class="fa-solid fa-user-plus me-2"></span>Điểm danh</a></div>
@@ -55,12 +55,12 @@
             <div class="col-xl-4 d-none d-xl-block">
               <div class="mb-8">
                 <div class="row g-0">
-                  <div class="col-6 border-1 border-bottom border-translucent border-end py-2"> <a class="btn btn-link ps-2 fs-8 text-body-secondary text-primary-hover fw-semibold d-flex flex-column d-xxl-inline-block" href="#!"><span class="fa-solid fa-user-group me-2 mb-2 mb-xxl-0"></span>Followers</a></div>
-                  <div class="col-6 border-1 border-bottom border-translucent py-2"><a class="btn btn-link fs-8 text-body-secondary text-primary-hover fw-semibold d-flex flex-column d-xxl-inline-block" href="#!"><span class="fa-solid fa-users me-2 mb-2 mb-xxl-0"></span>Communities</a></div>
-                  <div class="col-6 border-1 border-bottom border-translucent border-end py-2"><a class="btn btn-link ps-2 fs-8 text-body-secondary text-primary-hover fw-semibold d-flex flex-column d-xxl-inline-block" href="#!"><span class="fa-solid fa-photo-film me-2 mb-2 mb-xxl-0"></span>Media Files</a></div>
-                  <div class="col-6 border-1 border-bottom border-translucent py-2"><a class="btn btn-link fs-8 text-body-secondary text-primary-hover fw-semibold d-flex flex-column d-xxl-inline-block" href="#!"><span class="fa-solid fa-calendar-days me-2 mb-2 mb-xxl-0"></span>Events</a></div>
-                  <div class="col-6 border-1 border-end border-translucent py-2"><a class="btn btn-link ps-2 fs-8 text-body-secondary text-primary-hover fw-semibold d-flex flex-column d-xxl-inline-block" href="#!"><span class="fa-solid fa-dice me-2 mb-2 mb-xxl-0"></span>Games</a></div>
-                  <div class="col-6 border-1 py-2"><a class="btn btn-link fs-8 text-body-secondary text-primary-hover fw-semibold d-flex flex-column d-xxl-inline-block" href="#!"><span class="fa-solid fa-user-gear me-2 mb-2 mb-xxl-0"></span>Settings </a></div>
+                  <div class="col-6 border-1 border-bottom border-translucent border-end py-2"> <a class="btn btn-link ps-2 fs-8 text-body-secondary text-primary-hover fw-semibold d-flex flex-column d-xxl-inline-block" href="{{ route('students.index') }}"><span class="fa-solid fa-user-group me-2 mb-2 mb-xxl-0"></span>Học sinh</a></div>
+                  <div class="col-6 border-1 border-bottom border-translucent py-2"><a class="btn btn-link fs-8 text-body-secondary text-primary-hover fw-semibold d-flex flex-column d-xxl-inline-block {{ !$class->teacher_id ? 'disabled' : '' }}" href="{{ $class->teacher_id ? route('teachers.show', $class->teacher_id) : '#!' }}"><span class="fa-solid fa-chalkboard-user me-2 mb-2 mb-xxl-0"></span>Giáo viên</a></div>
+                  <div class="col-6 border-1 border-bottom border-translucent border-end py-2"><a class="btn btn-link ps-2 fs-8 text-body-secondary text-primary-hover fw-semibold d-flex flex-column d-xxl-inline-block {{ !$class->program_id ? 'disabled' : '' }}" href="{{ $class->program_id ? route('programs.show', $class->program_id) : '#!' }}"><span class="fa-solid fa-book me-2 mb-2 mb-xxl-0"></span>Chương trình học</a></div>
+                  <div class="col-6 border-1 border-bottom border-translucent py-2"><a class="btn btn-link fs-8 text-body-secondary text-primary-hover fw-semibold d-flex flex-column d-xxl-inline-block" href="{{ route('tuitions.all') }}"><span class="fa-solid fa-money-bill-wave me-2 mb-2 mb-xxl-0"></span>Học phí</a></div>
+                  <div class="col-6 border-1 border-end border-translucent py-2"><a class="btn btn-link ps-2 fs-8 text-body-secondary text-primary-hover fw-semibold d-flex flex-column d-xxl-inline-block" href="{{ route('attendances.index') }}"><span class="fa-solid fa-calendar-check me-2 mb-2 mb-xxl-0"></span>Lịch sử điểm danh</a></div>
+                  <div class="col-6 border-1 py-2"><a class="btn btn-link fs-8 text-body-secondary text-primary-hover fw-semibold d-flex flex-column d-xxl-inline-block" href="{{ route('classes.edit', $class->id) }}"><span class="fa-solid fa-pen-to-square me-2 mb-2 mb-xxl-0"></span>Chỉnh sửa lớp </a></div>
                 </div>
               </div>
               <div class="mb-8">

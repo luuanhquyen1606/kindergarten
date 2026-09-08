@@ -22,8 +22,11 @@
             </div>
             @endforeach
           </div>
-          <h4 class="mt-5 title">{{ $album->title ?: 'Bài viết ' . \Carbon\Carbon::parse($album->created_at)->format('d/m/Y') }}</h4>
-          <p class="mb-0 fs-9 text-body">{{ $album->photos->count() }} ảnh</p>
+          <h4 class="mt-5 title">{{ $album->title }}</h4>
+          <div class="d-flex justify-content-between mb-0 fs-9 text-body">
+            <span>{{ $album->photos->count() }} ảnh</span>
+            <span>{{ \Carbon\Carbon::parse($album->created_at)->format('d/m/Y') }}</span>
+          </div>
         </a>
         <div class="dropdown position-absolute top-0 end-0 mt-3 me-3 z-5">
           <button class="btn btn-sm px-3 dropdown-toggle dropdown-caret-none" type="button" data-bs-toggle="dropdown" data-boundary="window" aria-haspopup="true" aria-expanded="false" data-bs-reference="parent"><span class="fas fa-ellipsis-h"></span></button>
