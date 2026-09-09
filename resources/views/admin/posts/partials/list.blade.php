@@ -80,9 +80,7 @@
 
                     @forelse($posts as $post)
                     <?php
-                        $post_href = $post->type === 'event'
-                            ? '/su-kien-'.$post->slug
-                            : '/'.$post->routing_slug;
+                        $post_href = '/'.$post->routing_slug;
                     ?>
                     <tr class="hover-actions-trigger position-static">
                       <td class="fs-9 align-middle ps-0 py-3">
@@ -132,7 +130,7 @@
                       <td class="align-middle white-space-nowrap pe-5">{{ \Carbon\Carbon::parse($post->created_at)->format('d/m/Y') }}</td>
 
                       <td class="align-middle actions text-end pe-3">
-                        <a href="/{{ $post->routing_slug }}" class="btn btn-link text-body-quaternary p-0 me-2 js-no-ajax-nav" title="Xem chi tiết">
+                        <a href="/{{ $post->routing_slug }}" class="btn btn-link text-body-quaternary p-0 me-2 js-no-ajax-nav" title="Xem trước">
                           <span class="fas fa-eye text-body"></span>
                         </a>
                         <a href="/admin/posts/{{ $post->id }}/edit" class="btn btn-link text-body-quaternary p-0 me-2 js-no-ajax-nav" title="Chỉnh sửa">

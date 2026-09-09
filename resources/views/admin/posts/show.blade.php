@@ -2,7 +2,7 @@
 @section('content')
 
 <?php
-$post_href = $post->type === 'event' ? '/su-kien-'.$post->slug : '/'.$post->routing_slug;
+$post_href =  '/'.$post->routing_slug;
 ?>
 
 <div class="pb-9">

@@ -474,12 +474,17 @@ class HomeController extends BaseController
 
     public function event($slug)
     {
-        $event = DB::table('posts')
+        $routing = DB::table('routings')
+        ->where('entity', 'posts')
+        ->where('slug', $slug)
+        ->first();
+
+        $event = $routing ? DB::table('posts')
         ->join('files', 'posts.photo_id',  'files.id')
         ->select('posts.*', 'files.path as feature_path')
-        ->where('posts.slug', $slug)
+        ->where('posts.id', $routing->entity_id)
         ->where('posts.type', 'event')
-        ->first();
+        ->first() : null;
         $this->attachEventMeta($event);
 
        $files = DB::table('files')

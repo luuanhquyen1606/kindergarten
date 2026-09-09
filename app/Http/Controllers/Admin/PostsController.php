@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Str;
 
 class PostsController extends BaseController
 {
@@ -25,6 +24,28 @@ class PostsController extends BaseController
         }
 
         return $post;
+    }
+
+    /**
+     * Every post (news or event) is addressable through the routings table.
+     * Reuse the post's existing routing if one is already there, otherwise
+     * create it, so create and update both converge on the same routing row.
+     */
+    private function ensurePostRouting(int $postId, string $title, int $schoolId): void
+    {
+        $routing = DB::table('routings')
+            ->where('entity', 'posts')
+            ->where('entity_id', $postId)
+            ->where('school_id', $schoolId)
+            ->first();
+
+        $routing = $routing
+            ? updateSlug($routing->id, $title, $schoolId)
+            : getSlug($title, 'posts', $postId, $schoolId);
+
+        DB::table('posts')
+            ->where('id', $postId)
+            ->update(['routing_id' => $routing->id]);
     }
 
     private function saveEventMeta($postId, Request $request, $schoolId)
@@ -373,22 +394,7 @@ class PostsController extends BaseController
                 }
             };
         }
-        if ($type === 'news') {
-            $post = DB::table('posts')
-            ->where('posts.id', $id)
-            ->first();
-            if(!$post->routing_id){
-                $routing = getSlug($request->get('title'),'posts',$id,$schoolId);
-                DB::table('posts')
-                ->where('id', $id)
-                ->update(['routing_id' => $routing->id]);
-
-                 DB::table('posts')
-                ->where('id', $id)
-                ->update(['slug' => $routing->slug]);
-            }
-            updateSlug($post->routing_id,$request->get('title'),$schoolId);
-        }
+        $this->ensurePostRouting($id, $request->get('title'), $schoolId);
 
         return redirect()->route('posts.show', $id)
                      ->with('success', 'Post created!');
@@ -437,19 +443,9 @@ class PostsController extends BaseController
 
         if ($type === 'event') {
             $this->saveEventMeta($post_id, $request, $schoolId);
-            DB::table('posts')
-            ->where('id', $post_id)
-            ->update(['slug' => Str::slug($request->get('title'))]);
-        } else {
-            $routing = getSlug($request->get('title'),'posts',$post_id,$schoolId);
-            DB::table('posts')
-            ->where('id', $post_id)
-            ->update(['routing_id' => $routing->id]);
-
-             DB::table('posts')
-            ->where('id', $post_id)
-            ->update(['slug' => $routing->slug]);
         }
+
+        $this->ensurePostRouting($post_id, $request->get('title'), $schoolId);
 
 
         if($request->get('photo_id'))

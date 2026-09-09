@@ -142,7 +142,7 @@
                     <div class="card-body">
                       <h6 class="mb-2">Đường dẫn</h6>
                       <div class="input-group input-group-sm">
-                        <input type="text" class="form-control" readonly value="{{ url('/'.($post->routing_slug ?? $post->slug)) }}" id="post_public_url">
+                        <input type="text" class="form-control" readonly value="{{ url('/'.$post->routing_slug) }}" id="post_public_url">
                         <button class="btn btn-phoenix-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('post_public_url').value)">
                           <span class="fas fa-copy"></span>
                         </button>
