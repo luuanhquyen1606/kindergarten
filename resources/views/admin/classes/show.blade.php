@@ -35,9 +35,7 @@
                 </div>
                 <div class="col-auto">    
                   <div class="row g-2">
-                    @if(!$attendance_taken_today)
                     <div class="col-auto order-xxl-2"><a class="btn btn-primary lh-1" href="{{ route('attendances.show', $class->id) }}"><span class="fa-solid fa-user-plus me-2"></span>Điểm danh</a></div>
-                    @endif
                     <div class="col-auto order-xxl-1">
                       <a class="btn btn-phoenix-primary lh-1" href="{{ route('classes.albums', $class->id) }}"><span class="fa-solid fa-images me-2"></span> Album</a>
                     </div>
