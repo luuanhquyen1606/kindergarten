@@ -14,7 +14,7 @@
     </div>
 
 
-    <div class="card col-xl-8" >
+    <div class="card col-xl-12" >
         <div class="d-flex flex-wrap p-4">
                               <h5 class="mb-0 text-body-highlight me-2">Bài viết</h5>
                             </div>
@@ -42,9 +42,9 @@
         </div>
       </div>
     </div>
-                    
 
-   
+
+  
 </div>
 </div>
 @endsection

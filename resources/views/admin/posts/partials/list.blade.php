@@ -100,7 +100,7 @@
                             @endif
                           </div>
                           <div class="ms-3">
-                            <p class="mb-0 text-body-emphasis fw-bold">{{ $post->title }}</p>
+                            <p class="mb-0 text-body-emphasis ">{{ $post->title }}</p>
                             @if($post->tags->count())
                               <div class="mt-1">
                                 @foreach($post->tags as $tag)
@@ -132,7 +132,7 @@
                       <td class="align-middle white-space-nowrap pe-5">{{ \Carbon\Carbon::parse($post->created_at)->format('d/m/Y') }}</td>
 
                       <td class="align-middle actions text-end pe-3">
-                        <a href="/admin/posts/{{ $post->id }}" class="btn btn-link text-body-quaternary p-0 me-2 js-no-ajax-nav" title="Xem chi tiết">
+                        <a href="/{{ $post->routing_slug }}" class="btn btn-link text-body-quaternary p-0 me-2 js-no-ajax-nav" title="Xem chi tiết">
                           <span class="fas fa-eye text-body"></span>
                         </a>
                         <a href="/admin/posts/{{ $post->id }}/edit" class="btn btn-link text-body-quaternary p-0 me-2 js-no-ajax-nav" title="Chỉnh sửa">
