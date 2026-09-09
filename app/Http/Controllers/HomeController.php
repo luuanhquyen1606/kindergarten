@@ -7,6 +7,22 @@ use Spatie\Image\Image;
 use Illuminate\Support\Facades\File;
 class HomeController extends BaseController
 {
+    /**
+     * Draft posts/events are 404 to the public. A link carrying the right
+     * ?preview=<code> (see postPreviewCode()) can still open them, so the
+     * link can be shared with anyone before the post is published.
+     */
+    private function abortUnlessViewable($post): void
+    {
+        abort_if(!$post, 404);
+
+        if ($post->is_published) {
+            return;
+        }
+
+        abort_unless(request()->get('preview') === postPreviewCode($post->id), 404);
+    }
+
     public function index()
     {
         $home = DB::table('pages')
@@ -446,6 +462,8 @@ class HomeController extends BaseController
         ->select('posts.*','users.name as user_name','categories.name as category_name')
         ->first();
 
+        $this->abortUnlessViewable($post);
+
        $files = DB::table('files')
         ->join('post_files', 'files.id', '=', 'post_files.file_id')
         ->where('post_files.post_id', $post->id)
@@ -485,6 +503,9 @@ class HomeController extends BaseController
         ->where('posts.id', $routing->entity_id)
         ->where('posts.type', 'event')
         ->first() : null;
+
+        $this->abortUnlessViewable($event);
+
         $this->attachEventMeta($event);
 
        $files = DB::table('files')
@@ -593,6 +614,7 @@ class HomeController extends BaseController
                 }
             }
         $posts->where('posts.type', 'news');
+        $posts->where('posts.is_published', 1);
         $posts->whereNull('posts.deleted_at');
         $posts=$posts->select('posts.*',"thumbnails.path as thumbnail_path")
         ->orderBy('created_at','desc')
@@ -609,6 +631,7 @@ class HomeController extends BaseController
         ->join('files', 'files.id', '=', 'posts.photo_id')
         ->join('thumbnails', 'thumbnails.file_id', '=', 'files.id')
         ->where('posts.type', 'event')
+        ->where('posts.is_published', 1)
         ->whereNull('posts.deleted_at')
         ->select('posts.*',"thumbnails.path as thumbnail_path")
         ->paginate(10);

@@ -124,7 +124,7 @@ $post_href =  '/'.$post->routing_slug;
             <dd class="col-7">{{ \Carbon\Carbon::parse($post->updated_at)->format('d/m/Y H:i') }}</dd>
             @if($post->type !== 'event')
               <dt class="col-5">Đường dẫn</dt>
-              <dd class="col-7 text-truncate"><a href="{{ $post_href }}" target="_blank">{{ $post_href }}</a></dd>
+              <dd class="col-7 text-truncate"><a href="{{ $post_href }}{{ $post->is_published ? '' : '?preview='.postPreviewCode($post->id) }}" target="_blank">{{ $post_href }}</a></dd>
             @endif
           </dl>
         </div>

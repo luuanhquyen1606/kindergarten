@@ -54,6 +54,16 @@ if (! function_exists('getPhotoUrl')) {
         return $file->path;
     }
 }
+if (! function_exists('postPreviewCode')) {
+    /**
+     * Deterministic code for a post's shareable preview link — lets an
+     * unpublished post be viewed by anyone holding the link, without login.
+     */
+    function postPreviewCode($postId){
+        return md5('kidoo_post_preview_'.$postId);
+    }
+}
+
 function getSlug($title,$entity,$entity_id,$school_id){
     $slug = Str::slug($title);
         $existingSlugCount = DB::table('routings')
