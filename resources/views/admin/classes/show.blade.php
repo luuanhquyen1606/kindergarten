@@ -36,7 +36,7 @@
                 <div class="col-auto">    
                   <div class="row g-2">
                     <div class="col-auto order-xxl-2"><a class="btn btn-primary lh-1" href="{{ route('attendances.show', $class->id) }}"><span class="fa-solid fa-user-plus me-2"></span>Điểm danh</a></div>
-                    <div class="col-auto order-xxl-2"><button type="button" class="btn btn-phoenix-primary lh-1" data-bs-toggle="modal" data-bs-target="#class_meal_modal"><span class="fa-solid fa-utensils me-2"></span>Thực đơn</button></div>
+                    <div class="col-auto order-xxl-2"><button type="button" class="btn btn-phoenix-primary lh-1" data-bs-toggle="modal" data-bs-target="#class_meal_modal"><span class="fa-solid fa-utensils me-2"></span>Giờ ăn</button></div>
                     <div class="col-auto order-xxl-2"><a class="btn btn-phoenix-primary lh-1" href="{{ route('classes.daily_logs', $class->id) }}"><span class="fa-solid fa-notes-medical me-2"></span>Sức khỏe</a></div>
 
 
@@ -100,7 +100,7 @@
                 @endif
               </div>
               <div class="d-flex pb-4 align-items-end border-bottom border-translucent border-dashed">
-                <h3 class="flex-1 mb-0">Thực đơn hôm nay</h3>
+                <h3 class="flex-1 mb-0">Giờ ăn hôm nay</h3>
               </div>
               <div class="row g-0 mb-5 mb-lg-0">
                 @foreach($mealTypes as $mealType)
@@ -215,8 +215,16 @@
             <div class="modal-content">
               <form id="class_meal_form">
                 @csrf
+                <?php
+                  $classMealDayNames = ['Thứ Hai','Thứ Ba','Thứ Tư','Thứ Năm','Thứ Sáu','Thứ Bảy','Chủ Nhật'];
+                  $classMealToday = \Carbon\Carbon::parse($today);
+                  $classMealTodayLabel = $classMealDayNames[$classMealToday->dayOfWeekIso - 1].', '.$classMealToday->format('d/m/Y');
+                ?>
                 <div class="modal-header">
-                  <h5 class="modal-title">Cập nhật thực đơn hôm nay</h5>
+                  <div>
+                    <h5 class="modal-title mb-0">Cập nhật giờ ăn hôm nay</h5>
+                    <div class="fs-9 text-body-secondary">{{ $classMealTodayLabel }}</div>
+                  </div>
                   <button type="button" class="btn btn-close p-1" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -418,7 +426,7 @@ $('.class-meal-type-trigger').on('click', function () {
 });
 
 $('#class_meal_modal').on('show.bs.modal', function (e) {
-    // e.relatedTarget is only set when a real trigger element (the "Thực đơn" button or a
+    // e.relatedTarget is only set when a real trigger element (the "Giờ ăn" button or a
     // meal-type link) opened this modal. When the photo picker's own modal closes and this
     // one is brought back on top of it, it's reopened programmatically with no relatedTarget -
     // skip refilling the form then, or it would overwrite the photo the user just picked with
