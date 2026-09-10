@@ -105,10 +105,13 @@
               <div class="row g-0 mb-5 mb-lg-0">
                 @foreach($mealTypes as $mealType)
                   <?php $todayMeal = $todayMeals->get($mealType->id); ?>
-                  <div class="col-12 border-1 border-bottom border-translucent py-2">
+                  <div class="col-12 border-1 border-bottom border-translucent py-2 d-flex align-items-center justify-content-between">
                     <button type="button" class="btn btn-link px-0 fs-8 {{ $todayMeal ? 'text-success' : 'text-body-secondary' }} text-primary-hover fw-semibold d-flex class-meal-type-trigger" data-bs-toggle="modal" data-bs-target="#class_meal_modal" data-meal-type-id="{{ $mealType->id }}">
                       <span class="fa-solid {{ $todayMeal ? 'fa-circle-check' : 'fa-circle-question' }} me-2 mb-2 mb-xxl-0"></span>{{ $mealType->name }}{{ $todayMeal ? ' - đã cập nhật' : ' - chưa cập nhật' }}
                     </button>
+                    @if($todayMeal && $todayMeal->thumbnail_path)
+                      <img src="{{ $todayMeal->thumbnail_path }}" class="rounded ms-2" style="width:32px;height:32px;object-fit:cover;flex-shrink:0;" alt="{{ $mealType->name }}">
+                    @endif
                   </div>
                 @endforeach
               </div>
