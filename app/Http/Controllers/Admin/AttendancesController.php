@@ -66,7 +66,7 @@ class AttendancesController extends BaseController
         }
 
         $validator = Validator::make($request->all(), [
-            'date' => 'required|date|before_or_equal:today',
+            'date' => ['required', 'date', Rule::in([now()->format('Y-m-d')])],
             'updates' => 'required|array|min:1',
             'updates.*.student_id' => 'required|integer',
             'updates.*.status' => ['required', Rule::in(self::STATUSES)],
@@ -75,7 +75,7 @@ class AttendancesController extends BaseController
 
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Không thể điểm danh cho ngày trong tương lai hoặc dữ liệu không hợp lệ.',
+                'message' => 'Chỉ có thể điểm danh cho ngày hôm nay.',
                 'errors' => $validator->errors(),
             ], 422);
         }

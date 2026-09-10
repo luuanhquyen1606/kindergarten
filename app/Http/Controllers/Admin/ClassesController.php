@@ -259,6 +259,7 @@ class ClassesController extends BaseController
             'father.name as father_name', 'father.phone as father_phone',
             'mother.name as mother_name', 'mother.phone as mother_phone',
             'student_attendances.status as attendance_status',
+            'student_attendances.note as attendance_note',
             DB::raw('EXISTS(SELECT 1 FROM student_tuitions
                         WHERE student_tuitions.student_id = students.id
                         AND student_tuitions.status = \'unpaid\') as has_unpaid_tuition'))
@@ -861,7 +862,7 @@ class ClassesController extends BaseController
                 ->where('student_daily_logs.log_date', $date);
         })
         ->select('students.id', 'students.name', 'students.photo_id',
-            'student_daily_logs.nap_start', 'student_daily_logs.nap_end', 'student_daily_logs.mood',
+            'student_daily_logs.nap_quality', 'student_daily_logs.mood',
             'student_daily_logs.meal_amount', 'student_daily_logs.potty_count', 'student_daily_logs.notes')
         ->where('class_student.class_id', $class->id)
         ->whereNull('students.deleted_at')
@@ -894,8 +895,7 @@ class ClassesController extends BaseController
             'date' => 'required|date',
             'updates' => 'required|array|min:1',
             'updates.*.student_id' => 'required|integer',
-            'updates.*.nap_start' => 'nullable|date_format:H:i',
-            'updates.*.nap_end' => 'nullable|date_format:H:i',
+            'updates.*.nap_quality' => ['nullable', Rule::in(['good', 'insufficient', 'skipped'])],
             'updates.*.mood' => 'nullable|string|max:30',
             'updates.*.meal_amount' => ['nullable', Rule::in(['none', 'some', 'most', 'all'])],
             'updates.*.potty_count' => 'nullable|integer|min:0',
@@ -932,8 +932,7 @@ class ClassesController extends BaseController
     private function saveDailyLog($class, $school_id, $date, $studentId, $update)
     {
         $payload = [
-            'nap_start' => $update['nap_start'] ?? null,
-            'nap_end' => $update['nap_end'] ?? null,
+            'nap_quality' => $update['nap_quality'] ?? null,
             'mood' => $update['mood'] ?? null,
             'meal_amount' => $update['meal_amount'] ?? null,
             'potty_count' => $update['potty_count'] ?? null,

@@ -16,7 +16,7 @@
       <form method="GET" action="{{ route('attendances.show', ['class_id' => $class->id]) }}" class="row g-3 mb-4 align-items-end">
         <div class="col-auto">
           <label class="form-label">Ngày</label>
-          <input type="date" name="date" value="{{ $date }}" max="{{ now()->format('Y-m-d') }}" class="form-control" onchange="this.form.submit()">
+          <input type="date" name="date" value="{{ $date }}" min="{{ now()->format('Y-m-d') }}" max="{{ now()->format('Y-m-d') }}" class="form-control" onchange="this.form.submit()">
         </div>
       </form>
 

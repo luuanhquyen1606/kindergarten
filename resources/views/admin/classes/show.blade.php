@@ -35,7 +35,7 @@
                 </div>
                 <div class="col-auto">    
                   <div class="row g-2">
-                    <div class="col-auto order-xxl-2"><a class="btn btn-primary lh-1" href="{{ route('attendances.show', $class->id) }}"><span class="fa-solid fa-user-plus me-2"></span>Điểm danh</a></div>
+                    <div class="col-auto order-xxl-2"><button type="button" class="btn btn-primary lh-1" data-bs-toggle="modal" data-bs-target="#class_attendance_modal"><span class="fa-solid fa-user-plus me-2"></span>Điểm danh</button></div>
                     <div class="col-auto order-xxl-2"><button type="button" class="btn btn-phoenix-primary lh-1" data-bs-toggle="modal" data-bs-target="#class_meal_modal"><span class="fa-solid fa-utensils me-2"></span>Giờ ăn</button></div>
                     <div class="col-auto order-xxl-2"><a class="btn btn-phoenix-primary lh-1" href="{{ route('classes.daily_logs', $class->id) }}"><span class="fa-solid fa-notes-medical me-2"></span>Sức khỏe</a></div>
 
@@ -80,23 +80,23 @@
                 </div>
               </div>
               <div class="d-flex pb-4 align-items-end border-bottom border-translucent border-dashed">
-                <h3 class="flex-1 mb-0">Điểm danh</h3><a class="fw-bold fs-9" href="{{ route('attendances.show', ['class_id' => $class->id, 'date' => $today]) }}">Chi tiết</a>
+                <h3 class="flex-1 mb-0">Điểm danh</h3><button type="button" class="btn btn-link p-0 fw-bold fs-9" data-bs-toggle="modal" data-bs-target="#class_attendance_modal">Chi tiết</button>
               </div>
               <div class="row g-0 mb-5 mb-lg-0">
                 @if($present_count > 0)
-                <div class="col-12 border-1 border-bottom border-translucent py-2"><a class="btn btn-link px-0 fs-8 text-body-secondary text-primary-hover fw-semibold d-flex" href="#!"><span class="fa-solid fa-user-group me-2 mb-2 mb-xxl-0"></span>{{ $present_count }} Đến lớp</a></div>
+                <div class="col-12 border-1 border-bottom border-translucent py-2"><button type="button" class="btn btn-link px-0 fs-8 text-body-secondary text-primary-hover fw-semibold d-flex" data-bs-toggle="modal" data-bs-target="#class_attendance_modal"><span class="fa-solid fa-user-group me-2 mb-2 mb-xxl-0"></span>{{ $present_count }} Đến lớp</button></div>
                 @endif
                 @if($absent_count > 0)
-                <div class="col-12 border-1 border-bottom border-translucent py-2"><a class="btn btn-link px-0 fs-8 text-body-secondary text-primary-hover fw-semibold d-flex" href="#!"><span class="fa-solid fa-user-xmark me-2 mb-2 mb-xxl-0"></span>{{ $absent_count }} Vắng</a></div>
+                <div class="col-12 border-1 border-bottom border-translucent py-2"><button type="button" class="btn btn-link px-0 fs-8 text-body-secondary text-primary-hover fw-semibold d-flex" data-bs-toggle="modal" data-bs-target="#class_attendance_modal"><span class="fa-solid fa-user-xmark me-2 mb-2 mb-xxl-0"></span>{{ $absent_count }} Vắng</button></div>
                 @endif
                 @if($late_count > 0)
-                <div class="col-12 border-1 border-bottom border-translucent py-2"><a class="btn btn-link px-0 fs-8 text-body-secondary text-primary-hover fw-semibold d-flex" href="#!"><span class="fa-solid fa-clock me-2 mb-2 mb-xxl-0"></span>{{ $late_count }} Đi muộn</a></div>
+                <div class="col-12 border-1 border-bottom border-translucent py-2"><button type="button" class="btn btn-link px-0 fs-8 text-body-secondary text-primary-hover fw-semibold d-flex" data-bs-toggle="modal" data-bs-target="#class_attendance_modal"><span class="fa-solid fa-clock me-2 mb-2 mb-xxl-0"></span>{{ $late_count }} Đi muộn</button></div>
                 @endif
                 @if($excused_count > 0)
-                <div class="col-12 border-1 border-bottom border-translucent py-2"><a class="btn btn-link px-0 fs-8 text-body-secondary text-primary-hover fw-semibold d-flex" href="#!"><span class="fa-solid fa-file-circle-check me-2 mb-2 mb-xxl-0"></span>{{ $excused_count }} Có phép</a></div>
+                <div class="col-12 border-1 border-bottom border-translucent py-2"><button type="button" class="btn btn-link px-0 fs-8 text-body-secondary text-primary-hover fw-semibold d-flex" data-bs-toggle="modal" data-bs-target="#class_attendance_modal"><span class="fa-solid fa-file-circle-check me-2 mb-2 mb-xxl-0"></span>{{ $excused_count }} Có phép</button></div>
                 @endif
                 @if($unmarked_count > 0)
-                <div class="col-12 py-2"><a class="btn btn-link px-0 fs-8 text-body-secondary text-primary-hover fw-semibold d-flex" href="#!"><span class="fa-solid fa-circle-question me-2 mb-2 mb-xxl-0"></span>{{ $unmarked_count }} Chưa điểm danh</a></div>
+                <div class="col-12 py-2"><button type="button" class="btn btn-link px-0 fs-8 text-body-secondary text-primary-hover fw-semibold d-flex" data-bs-toggle="modal" data-bs-target="#class_attendance_modal"><span class="fa-solid fa-circle-question me-2 mb-2 mb-xxl-0"></span>{{ $unmarked_count }} Chưa điểm danh</button></div>
                 @endif
               </div>
               <div class="d-flex pb-4 align-items-end border-bottom border-translucent border-dashed">
@@ -250,6 +250,89 @@
                   <button type="submit" class="btn btn-primary">Lưu</button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal fade" id="class_attendance_modal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+              <div class="modal-header">
+                <div>
+                  <h5 class="modal-title mb-0">Điểm danh hôm nay</h5>
+                  <div class="fs-9 text-body-secondary">{{ $classMealTodayLabel }}</div>
+                </div>
+                <button type="button" class="btn btn-close p-1" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="alert alert-danger d-none" id="class-attendance-error-alert"></div>
+                <div id="class-attendance-board" data-update-url="{{ route('attendances.update', $class->id) }}" data-date="{{ $today }}">
+                  <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                    <span class="fs-9 fw-semibold text-body-secondary me-2" id="class-attendance-selected-count">0 học sinh được chọn</span>
+                    <button type="button" class="btn btn-sm btn-phoenix-success" data-bulk-status="present">Có mặt</button>
+                    <button type="button" class="btn btn-sm btn-phoenix-danger" data-bulk-status="absent">Vắng</button>
+                    <button type="button" class="btn btn-sm btn-phoenix-warning" data-bulk-status="late">Đi muộn</button>
+                    <button type="button" class="btn btn-sm btn-phoenix-info" data-bulk-status="excused">Vắng có phép</button>
+                  </div>
+                  <div class="d-none align-items-center gap-2 mb-3" id="class-attendance-bulk-note-wrapper">
+                    <input type="text" id="class-attendance-bulk-note-input" class="form-control form-control-sm" style="max-width:320px" placeholder="Ghi chú áp dụng cho các học sinh đã chọn">
+                    <button type="button" class="btn btn-sm btn-phoenix-secondary" id="class-attendance-bulk-note-apply">Áp dụng ghi chú</button>
+                  </div>
+                  <div class="border-top border-bottom border-translucent position-relative top-1">
+                    <div class="table-responsive scrollbar-overlay mx-n1 px-1" style="max-height: 50vh;">
+                      <table class="table table-sm fs-9 mb-0">
+                        <thead>
+                          <tr>
+                            <th class="align-middle ps-0" style="width:1%">
+                              <div class="form-check mb-0 fs-8"><input class="form-check-input" type="checkbox" id="class-attendance-select-all"></div>
+                            </th>
+                            <th class="align-middle" style="width:30%">Học sinh</th>
+                            <th class="align-middle" style="width:22%">Trạng thái</th>
+                            <th class="align-middle">Ghi chú</th>
+                            <th class="align-middle text-end pe-3" style="width:8%"></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @foreach($students as $student)
+                            <?php $currentAttendance = $student->attendance_status ?? 'unmarked'; ?>
+                            <tr>
+                              <td class="align-middle ps-0 py-3">
+                                <div class="form-check mb-0 fs-8">
+                                  <input class="form-check-input class-attendance-row-select" type="checkbox" data-student-id="{{ $student->id }}">
+                                </div>
+                              </td>
+                              <td class="align-middle py-3">
+                                <div class="d-flex align-items-center">
+                                  <div class="avatar avatar-m"><img class="rounded-square" src="{{ $student->thumbnail_path ?? '/assets/admin/trans.png' }}" alt=""></div>
+                                  <p class="mb-0 ms-3 text-body-emphasis fw-bold">{{ $student->name }}</p>
+                                </div>
+                              </td>
+                              <td class="align-middle">
+                                <select class="form-select form-select-sm class-attendance-status-input" data-student-id="{{ $student->id }}">
+                                  <option value="unmarked" {{ $currentAttendance == 'unmarked' ? 'selected' : '' }}>Chưa điểm danh</option>
+                                  <option value="present" {{ $currentAttendance == 'present' ? 'selected' : '' }}>Có mặt</option>
+                                  <option value="absent" {{ $currentAttendance == 'absent' ? 'selected' : '' }}>Vắng</option>
+                                  <option value="late" {{ $currentAttendance == 'late' ? 'selected' : '' }}>Đi muộn</option>
+                                  <option value="excused" {{ $currentAttendance == 'excused' ? 'selected' : '' }}>Vắng có phép</option>
+                                </select>
+                              </td>
+                              <td class="align-middle">
+                                <input type="text" value="{{ $student->attendance_note }}" class="form-control form-control-sm class-attendance-note-input" data-student-id="{{ $student->id }}" placeholder="Ghi chú">
+                              </td>
+                              <td class="align-middle text-end pe-3">
+                                <span class="class-attendance-row-status fs-10 text-body-tertiary" data-student-id="{{ $student->id }}"></span>
+                              </td>
+                            </tr>
+                          @endforeach
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-phoenix-secondary" data-bs-dismiss="modal">Đóng</button>
+              </div>
             </div>
           </div>
         </div>
@@ -464,5 +547,145 @@ $('#class_meal_form').on('submit', function (e) {
         }
     });
 });
+
+(function () {
+    var $board = $('#class-attendance-board');
+    if (!$board.length) return;
+
+    var updateUrl = $board.data('update-url');
+    var dateValue = $board.data('date');
+    var $errorAlert = $('#class-attendance-error-alert');
+    var $selectAll = $('#class-attendance-select-all');
+    var $rowChecks = $board.find('.class-attendance-row-select');
+    var $countEl = $('#class-attendance-selected-count');
+    var $noteWrapper = $('#class-attendance-bulk-note-wrapper');
+    var $noteInput = $('#class-attendance-bulk-note-input');
+    var attendanceChanged = false;
+
+    function selectedIds() {
+        return $rowChecks.filter(':checked').map(function () { return $(this).data('student-id'); }).get();
+    }
+
+    function updateCount() {
+        $countEl.text(selectedIds().length + ' học sinh được chọn');
+    }
+
+    function showError(message) {
+        $errorAlert.text(message).removeClass('d-none');
+    }
+
+    function clearError() {
+        $errorAlert.addClass('d-none').text('');
+    }
+
+    function statusSelect(studentId) {
+        return $board.find('.class-attendance-status-input[data-student-id="' + studentId + '"]');
+    }
+
+    function noteInputFor(studentId) {
+        return $board.find('.class-attendance-note-input[data-student-id="' + studentId + '"]');
+    }
+
+    function setRowState(studentId, state) {
+        var $el = $board.find('.class-attendance-row-status[data-student-id="' + studentId + '"]');
+        if (!$el.length) return;
+        if (state === 'saving') {
+            $el.text('Đang lưu...').attr('class', 'class-attendance-row-status fs-10 text-body-tertiary');
+        } else if (state === 'saved') {
+            $el.text('Đã lưu').attr('class', 'class-attendance-row-status fs-10 text-success');
+            setTimeout(function () {
+                if ($el.text() === 'Đã lưu') $el.text('');
+            }, 1500);
+        } else if (state === 'error') {
+            $el.text('Lỗi').attr('class', 'class-attendance-row-status fs-10 text-danger');
+        }
+    }
+
+    function buildUpdates(studentIds, overrides) {
+        return studentIds.map(function (studentId) {
+            var $select = statusSelect(studentId);
+            var $noteEl = noteInputFor(studentId);
+            var status = (overrides && overrides.status) ? overrides.status : ($select.length ? $select.val() : 'unmarked');
+            var note = (overrides && typeof overrides.note === 'string') ? overrides.note : ($noteEl.length ? $noteEl.val() : '');
+            return { student_id: studentId, status: status, note: note };
+        });
+    }
+
+    function sendUpdates(studentIds, updates) {
+        studentIds.forEach(function (id) { setRowState(id, 'saving'); });
+        clearError();
+
+        $.ajax({
+            url: updateUrl,
+            type: 'POST',
+            data: { _token: '{{ csrf_token() }}', date: dateValue, updates: updates },
+            success: function () {
+                attendanceChanged = true;
+                studentIds.forEach(function (id) { setRowState(id, 'saved'); });
+            },
+            error: function (xhr) {
+                studentIds.forEach(function (id) { setRowState(id, 'error'); });
+                showError((xhr.responseJSON && xhr.responseJSON.message) || 'Không thể lưu điểm danh.');
+            }
+        });
+    }
+
+    function saveRow(studentId) {
+        sendUpdates([studentId], buildUpdates([studentId]));
+    }
+
+    $board.on('change', '.class-attendance-status-input', function () {
+        saveRow($(this).data('student-id'));
+    });
+
+    $board.on('change', '.class-attendance-note-input', function () {
+        saveRow($(this).data('student-id'));
+    });
+
+    $selectAll.on('change', function () {
+        $rowChecks.prop('checked', $selectAll.is(':checked'));
+        updateCount();
+    });
+
+    $rowChecks.on('change', function () {
+        if (!$(this).is(':checked')) $selectAll.prop('checked', false);
+        updateCount();
+    });
+
+    $board.on('click', '[data-bulk-status]', function () {
+        var status = $(this).data('bulk-status');
+        var ids = selectedIds();
+        if (!ids.length) return;
+
+        ids.forEach(function (studentId) {
+            statusSelect(studentId).val(status);
+        });
+
+        $noteWrapper.removeClass('d-none').addClass('d-flex');
+        $noteInput.trigger('focus');
+
+        sendUpdates(ids, buildUpdates(ids, { status: status }));
+    });
+
+    $('#class-attendance-bulk-note-apply').on('click', function () {
+        var ids = selectedIds();
+        if (!ids.length) return;
+        var text = $noteInput.val();
+
+        ids.forEach(function (studentId) {
+            noteInputFor(studentId).val(text);
+        });
+
+        sendUpdates(ids, buildUpdates(ids, { note: text }));
+    });
+
+    $('#class_attendance_modal').on('hidden.bs.modal', function () {
+        if (attendanceChanged) {
+            window.location.reload();
+        }
+    });
+
+    updateCount();
+})();
 </script>
 @endsection

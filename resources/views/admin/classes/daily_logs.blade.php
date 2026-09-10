@@ -29,8 +29,7 @@
               <thead>
                 <tr>
                   <th class="align-middle ps-0" style="width:16%">Học sinh</th>
-                  <th class="align-middle" style="width:10%">Ngủ trưa từ</th>
-                  <th class="align-middle" style="width:10%">Đến</th>
+                  <th class="align-middle" style="width:16%">Giấc ngủ trưa</th>
                   <th class="align-middle" style="width:12%">Tâm trạng</th>
                   <th class="align-middle" style="width:12%">Ăn uống</th>
                   <th class="align-middle" style="width:8%">Vệ sinh</th>
@@ -48,10 +47,12 @@
                       </div>
                     </td>
                     <td class="align-middle">
-                      <input type="time" value="{{ $student->nap_start }}" class="form-control form-control-sm daily-log-input" data-field="nap_start" data-student-id="{{ $student->id }}">
-                    </td>
-                    <td class="align-middle">
-                      <input type="time" value="{{ $student->nap_end }}" class="form-control form-control-sm daily-log-input" data-field="nap_end" data-student-id="{{ $student->id }}">
+                      <select class="form-select form-select-sm daily-log-input" data-field="nap_quality" data-student-id="{{ $student->id }}">
+                        <option value="" {{ !$student->nap_quality ? 'selected' : '' }}>--</option>
+                        <option value="good" {{ $student->nap_quality == 'good' ? 'selected' : '' }}>Ngủ ngon</option>
+                        <option value="insufficient" {{ $student->nap_quality == 'insufficient' ? 'selected' : '' }}>Ngủ không đủ giấc</option>
+                        <option value="skipped" {{ $student->nap_quality == 'skipped' ? 'selected' : '' }}>Không ngủ trưa</option>
+                      </select>
                     </td>
                     <td class="align-middle">
                       <select class="form-select form-select-sm daily-log-input" data-field="mood" data-student-id="{{ $student->id }}">
@@ -131,7 +132,7 @@
     }
 
     function buildUpdate(studentId) {
-      var fields = ['nap_start', 'nap_end', 'mood', 'meal_amount', 'potty_count', 'notes'];
+      var fields = ['nap_quality', 'mood', 'meal_amount', 'potty_count', 'notes'];
       var update = { student_id: studentId };
       fields.forEach(function (field) {
         var el = board.querySelector('.daily-log-input[data-field="' + field + '"][data-student-id="' + studentId + '"]');
