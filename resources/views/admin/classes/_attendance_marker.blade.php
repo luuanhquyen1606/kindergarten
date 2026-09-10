@@ -22,5 +22,35 @@
       <span><span class="fa-solid fa-circle-question me-1"></span>{{ $counts['unmarked'] }} Chưa điểm danh</span>
       @endif
     </div>
+
+    @if(isset($meals) && $meals->isNotEmpty())
+    <div class="d-flex flex-wrap column-gap-4 row-gap-2 fs-9 text-body-tertiary mt-2 pt-2 border-top border-dashed">
+      @foreach($meals as $meal)
+      <span class="d-inline-flex align-items-center">
+        @if($meal->thumbnail_path)
+        <a href="{{ $meal->photo_path }}" class="class-meal-photo me-2" data-gallery="gallery-class-meal-{{ $class_id }}-{{ $date }}">
+          <img src="{{ $meal->thumbnail_path }}" class="rounded" style="width:28px;height:28px;object-fit:cover;" alt="{{ $meal->meal_type_name }}">
+        </a>
+        @else
+        <span class="fa-solid fa-utensils me-1"></span>
+        @endif
+        <span class="fw-semibold me-1">{{ $meal->meal_type_name }}:</span>
+        {{ Str::limit($meal->description ?: 'Chưa có mô tả', 60) }}
+      </span>
+      @endforeach
+    </div>
+    @endif
+
+    @if(isset($attention) && $attention->isNotEmpty())
+    <div class="alert alert-subtle-warning d-flex align-items-start mt-3 mb-0 py-2 px-3">
+      <span class="fa-solid fa-triangle-exclamation me-2 mt-1"></span>
+      <div class="fs-9">
+        <span class="fw-bold text-warning-emphasis">Lưu ý:</span>
+        @foreach($attention as $row)
+        <span class="d-block">{{ $row->name }} &mdash; {{ implode(', ', $row->attention_reasons) }}</span>
+        @endforeach
+      </div>
+    </div>
+    @endif
   </div>
 </div>

@@ -255,11 +255,21 @@ class ClassesController extends BaseController
                 ->where('student_attendances.class_id', $class->id)
                 ->where('student_attendances.date', $today);
         })
+        ->leftJoin('student_daily_logs', function ($join) use ($class, $today) {
+            $join->on('student_daily_logs.student_id', 'students.id')
+                ->where('student_daily_logs.class_id', $class->id)
+                ->where('student_daily_logs.log_date', $today);
+        })
         ->select('students.id', 'students.name', 'students.gender', 'students.birthdate', 'students.photo_id',
             'father.name as father_name', 'father.phone as father_phone',
             'mother.name as mother_name', 'mother.phone as mother_phone',
             'student_attendances.status as attendance_status',
             'student_attendances.note as attendance_note',
+            'student_daily_logs.nap_quality as daily_log_nap_quality',
+            'student_daily_logs.mood as daily_log_mood',
+            'student_daily_logs.meal_amount as daily_log_meal_amount',
+            'student_daily_logs.potty_count as daily_log_potty_count',
+            'student_daily_logs.notes as daily_log_notes',
             DB::raw('EXISTS(SELECT 1 FROM student_tuitions
                         WHERE student_tuitions.student_id = students.id
                         AND student_tuitions.status = \'unpaid\') as has_unpaid_tuition'))
@@ -269,13 +279,12 @@ class ClassesController extends BaseController
         ->get();
         $students->each(fn($student) => $student->thumbnail_path = getThumbnailUrl($student->photo_id));
 
-        $postsPerPage = 1;
-        $posts = $this->getClassPosts($class->id, $school_id, 0, $postsPerPage + 1);
-        $hasMorePosts = $posts->count() > $postsPerPage;
-        $posts = $posts->take($postsPerPage)->values();
+        $feedDatesPerPage = 1;
+        $feedDates = $this->getClassFeedDates($class->id, $school_id);
+        $hasMorePosts = $feedDates->count() > $feedDatesPerPage;
+        $pageDates = $feedDates->take($feedDatesPerPage)->values();
 
-        $lastPostDate = null;
-        $postsHtml = $this->renderPostsFeed($class->id, $posts, $lastPostDate);
+        $postsHtml = $this->renderFeedForDates($class->id, $school_id, $pageDates);
 
         $recent_photos = DB::table('post_class')
         ->join('posts', 'posts.id', 'post_class.post_id')
@@ -307,9 +316,8 @@ class ClassesController extends BaseController
         $data['mealTypes'] = $mealTypes;
         $data['todayMeals'] = $todayMeals;
         $data['students'] = $students;
-        $data['posts'] = $posts;
+        $data['feed_dates'] = $pageDates;
         $data['posts_html'] = $postsHtml;
-        $data['last_post_date'] = $lastPostDate;
         $data['has_more_posts'] = $hasMorePosts;
         $data['recent_photos'] = $recent_photos;
         $data['today'] = $today;
@@ -323,7 +331,7 @@ class ClassesController extends BaseController
 
         return view('admin.classes.show', $data);
     }
-    private function getClassPosts($classId, $school_id, $offset, $limit)
+    private function getClassPostsForDate($classId, $school_id, $date)
     {
         $posts = DB::table('post_class')
         ->join('posts', 'posts.id', 'post_class.post_id')
@@ -332,10 +340,9 @@ class ClassesController extends BaseController
         ->where('post_class.class_id', $classId)
         ->where('posts.school_id', $school_id)
         ->whereNull('posts.deleted_at')
+        ->whereDate('posts.created_at', $date)
         ->orderBy('posts.created_at', 'desc')
         ->orderBy('posts.id', 'desc')
-        ->offset($offset)
-        ->limit($limit)
         ->get();
 
         $postPhotos = DB::table('post_files')
@@ -350,6 +357,44 @@ class ClassesController extends BaseController
         }
 
         return $posts;
+    }
+
+    /**
+     * Every distinct date (across posts, attendance, daily logs and meals) that has
+     * activity for the class, newest first — this drives the class feed so a day's
+     * attendance_marker shows up even when no post was made that day.
+     */
+    private function getClassFeedDates($classId, $school_id)
+    {
+        $postDates = DB::table('post_class')
+        ->join('posts', 'posts.id', 'post_class.post_id')
+        ->where('post_class.class_id', $classId)
+        ->where('posts.school_id', $school_id)
+        ->whereNull('posts.deleted_at')
+        ->pluck('posts.created_at');
+
+        $attendanceDates = DB::table('student_attendances')
+        ->where('class_id', $classId)
+        ->where('school_id', $school_id)
+        ->pluck('date');
+
+        $dailyLogDates = DB::table('student_daily_logs')
+        ->where('class_id', $classId)
+        ->where('school_id', $school_id)
+        ->whereNull('deleted_at')
+        ->pluck('log_date');
+
+        $mealDates = DB::table('class_meals')
+        ->where('class_id', $classId)
+        ->where('school_id', $school_id)
+        ->whereNull('deleted_at')
+        ->pluck('meal_date');
+
+        return $postDates->concat($attendanceDates)->concat($dailyLogDates)->concat($mealDates)
+        ->map(fn($date) => \Carbon\Carbon::parse($date)->format('Y-m-d'))
+        ->unique()
+        ->sortDesc()
+        ->values();
     }
 
     private function getAttendanceCounts($classId, $date)
@@ -375,22 +420,89 @@ class ClassesController extends BaseController
         ];
     }
 
-    private function renderPostsFeed($classId, $posts, &$lastDate)
+    private function renderFeedForDates($classId, $school_id, $dates)
     {
         $html = '';
-        foreach ($posts as $post) {
-            $date = \Carbon\Carbon::parse($post->created_at)->format('Y-m-d');
-            if ($date !== $lastDate) {
-                $html .= view('admin.classes._attendance_marker', [
-                    'class_id' => $classId,
-                    'date' => $date,
-                    'counts' => $this->getAttendanceCounts($classId, $date),
-                ])->render();
-                $lastDate = $date;
+        foreach ($dates as $date) {
+            $html .= view('admin.classes._attendance_marker', [
+                'class_id' => $classId,
+                'date' => $date,
+                'counts' => $this->getAttendanceCounts($classId, $date),
+                'meals' => $this->getClassMeals($classId, $date),
+                'attention' => $this->getDailyLogAttention($classId, $date),
+            ])->render();
+
+            foreach ($this->getClassPostsForDate($classId, $school_id, $date) as $post) {
+                $html .= view('admin.classes._post_card', ['post' => $post])->render();
             }
-            $html .= view('admin.classes._post_card', ['post' => $post])->render();
         }
         return $html;
+    }
+
+    private function getClassMeals($classId, $date)
+    {
+        return DB::table('class_meals')
+        ->join('meal_types', 'meal_types.id', 'class_meals.meal_type_id')
+        ->where('class_meals.class_id', $classId)
+        ->where('class_meals.meal_date', $date)
+        ->whereNull('class_meals.deleted_at')
+        ->select('class_meals.*', 'meal_types.name as meal_type_name')
+        ->orderBy('meal_types.sort')
+        ->get()
+        ->map(function ($meal) {
+            $meal->thumbnail_path = getThumbnailUrl($meal->photo_id);
+            $meal->photo_path = $meal->photo_id ? getPhotoUrl($meal->photo_id) : null;
+            return $meal;
+        });
+    }
+
+    private function getDailyLogAttention($classId, $date)
+    {
+        $moodLabels = [
+            'quay_khoc' => 'Quấy khóc',
+            'met_moi' => 'Mệt mỏi',
+            'om' => 'Ốm',
+        ];
+
+        return DB::table('student_daily_logs')
+        ->join('students', 'students.id', 'student_daily_logs.student_id')
+        ->where('student_daily_logs.class_id', $classId)
+        ->where('student_daily_logs.log_date', $date)
+        ->whereNull('students.deleted_at')
+        ->select('students.id', 'students.name', 'students.photo_id',
+            'student_daily_logs.nap_quality', 'student_daily_logs.mood',
+            'student_daily_logs.meal_amount', 'student_daily_logs.notes')
+        ->orderBy('students.name')
+        ->get()
+        ->map(function ($row) use ($moodLabels) {
+            $row->thumbnail_path = getThumbnailUrl($row->photo_id);
+            $reasons = [];
+
+            if ($row->nap_quality == 'insufficient') {
+                $reasons[] = 'Ngủ không đủ giấc';
+            } elseif ($row->nap_quality == 'skipped') {
+                $reasons[] = 'Không ngủ trưa';
+            }
+
+            if (isset($moodLabels[$row->mood])) {
+                $reasons[] = $moodLabels[$row->mood];
+            }
+
+            if ($row->meal_amount == 'none') {
+                $reasons[] = 'Không ăn';
+            } elseif ($row->meal_amount == 'some') {
+                $reasons[] = 'Ăn ít';
+            }
+
+            if (!empty(trim((string) $row->notes))) {
+                $reasons[] = trim($row->notes);
+            }
+
+            $row->attention_reasons = $reasons;
+            return $row;
+        })
+        ->filter(fn($row) => !empty($row->attention_reasons))
+        ->values();
     }
 
     public function loadPosts(Request $request, $id)
@@ -409,19 +521,17 @@ class ClassesController extends BaseController
 
         $limit = 10;
         $offset = max(0, (int) $request->get('offset', 0));
-        $lastDate = $request->get('last_date') ?: null;
 
-        $posts = $this->getClassPosts($class->id, $school_id, $offset, $limit + 1);
-        $hasMore = $posts->count() > $limit;
-        $posts = $posts->take($limit)->values();
+        $feedDates = $this->getClassFeedDates($class->id, $school_id);
+        $pageDates = $feedDates->slice($offset, $limit)->values();
+        $hasMore = $feedDates->count() > $offset + $pageDates->count();
 
-        $html = $this->renderPostsFeed($class->id, $posts, $lastDate);
+        $html = $this->renderFeedForDates($class->id, $school_id, $pageDates);
 
         return response()->json([
             'html' => $html,
             'has_more' => $hasMore,
-            'next_offset' => $offset + $posts->count(),
-            'last_date' => $lastDate,
+            'next_offset' => $offset + $pageDates->count(),
         ]);
     }
 
@@ -892,7 +1002,7 @@ class ClassesController extends BaseController
         }
 
         $validator = Validator::make($request->all(), [
-            'date' => 'required|date',
+            'date' => ['required', 'date', Rule::in([now()->format('Y-m-d')])],
             'updates' => 'required|array|min:1',
             'updates.*.student_id' => 'required|integer',
             'updates.*.nap_quality' => ['nullable', Rule::in(['good', 'insufficient', 'skipped'])],
@@ -904,7 +1014,7 @@ class ClassesController extends BaseController
 
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Dữ liệu không hợp lệ.',
+                'message' => 'Chỉ có thể cập nhật sức khỏe hàng ngày cho ngày hôm nay.',
                 'errors' => $validator->errors(),
             ], 422);
         }

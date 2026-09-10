@@ -37,7 +37,7 @@
                   <div class="row g-2">
                     <div class="col-auto order-xxl-2"><button type="button" class="btn btn-primary lh-1" data-bs-toggle="modal" data-bs-target="#class_attendance_modal"><span class="fa-solid fa-user-plus me-2"></span>Điểm danh</button></div>
                     <div class="col-auto order-xxl-2"><button type="button" class="btn btn-phoenix-primary lh-1" data-bs-toggle="modal" data-bs-target="#class_meal_modal"><span class="fa-solid fa-utensils me-2"></span>Giờ ăn</button></div>
-                    <div class="col-auto order-xxl-2"><a class="btn btn-phoenix-primary lh-1" href="{{ route('classes.daily_logs', $class->id) }}"><span class="fa-solid fa-notes-medical me-2"></span>Sức khỏe</a></div>
+                    <div class="col-auto order-xxl-2"><button type="button" class="btn btn-phoenix-primary lh-1" data-bs-toggle="modal" data-bs-target="#class_daily_log_modal"><span class="fa-solid fa-notes-medical me-2"></span>Sức khỏe</button></div>
 
 
                     
@@ -130,11 +130,11 @@
                 </div>
               </div>
 
-              <div id="class_posts_feed" data-offset="{{ $posts->count() }}" data-has-more="{{ $has_more_posts ? '1' : '0' }}" data-last-date="{{ $last_post_date }}">
-                @if($posts->isEmpty())
+              <div id="class_posts_feed" data-offset="{{ $feed_dates->count() }}" data-has-more="{{ $has_more_posts ? '1' : '0' }}">
+                @if($feed_dates->isEmpty())
                 <div class="card mb-4" id="class_posts_empty">
                   <div class="card-body p-4 text-center text-body-tertiary">
-                    Chưa có bài viết nào cho lớp học này.
+                    Chưa có hoạt động nào cho lớp học này.
                   </div>
                 </div>
                 @else
@@ -336,13 +336,151 @@
             </div>
           </div>
         </div>
+
+        <div class="modal fade" id="class_daily_log_modal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+              <div class="modal-header">
+                <div>
+                  <h5 class="modal-title mb-0">Sức khỏe hàng ngày</h5>
+                  <div class="fs-9 text-body-secondary">{{ $classMealTodayLabel }}</div>
+                </div>
+                <button type="button" class="btn btn-close p-1" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                <div class="alert alert-danger d-none" id="class-daily-log-error-alert"></div>
+                <div id="class-daily-log-board" data-update-url="{{ route('classes.daily_logs.update', $class->id) }}" data-date="{{ $today }}">
+                  <div class="d-flex flex-wrap align-items-end gap-2 mb-3 p-2 bg-body-secondary rounded-2">
+                    <span class="fs-9 fw-semibold text-body-secondary me-2" id="class-daily-log-selected-count">0 học sinh được chọn</span>
+                    <div>
+                      <label class="form-label fs-10 mb-1">Giấc ngủ trưa</label>
+                      <select class="form-select form-select-sm" id="class-daily-log-bulk-nap_quality" style="width:160px">
+                        <option value="">-- (giữ nguyên)</option>
+                        <option value="good">Ngủ ngon</option>
+                        <option value="insufficient">Ngủ không đủ giấc</option>
+                        <option value="skipped">Không ngủ trưa</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="form-label fs-10 mb-1">Tâm trạng</label>
+                      <select class="form-select form-select-sm" id="class-daily-log-bulk-mood" style="width:160px">
+                        <option value="">-- (giữ nguyên)</option>
+                        <option value="vui_ve">Vui vẻ</option>
+                        <option value="binh_thuong">Bình thường</option>
+                        <option value="quay_khoc">Quấy khóc</option>
+                        <option value="met_moi">Mệt mỏi</option>
+                        <option value="om">Ốm</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="form-label fs-10 mb-1">Ăn uống</label>
+                      <select class="form-select form-select-sm" id="class-daily-log-bulk-meal_amount" style="width:150px">
+                        <option value="">-- (giữ nguyên)</option>
+                        <option value="all">Ăn hết</option>
+                        <option value="most">Ăn phần lớn</option>
+                        <option value="some">Ăn ít</option>
+                        <option value="none">Không ăn</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="form-label fs-10 mb-1">Vệ sinh</label>
+                      <input type="number" min="0" class="form-control form-control-sm" id="class-daily-log-bulk-potty_count" style="width:90px" placeholder="Số lần">
+                    </div>
+                    <div class="flex-grow-1" style="min-width:180px">
+                      <label class="form-label fs-10 mb-1">Ghi chú</label>
+                      <input type="text" class="form-control form-control-sm" id="class-daily-log-bulk-notes" placeholder="Ghi chú">
+                    </div>
+                    <button type="button" class="btn btn-sm btn-phoenix-primary" id="class-daily-log-bulk-apply">Áp dụng cho học sinh đã chọn</button>
+                  </div>
+
+                  <div class="border-top border-bottom border-translucent position-relative top-1">
+                    <div class="table-responsive scrollbar-overlay mx-n1 px-1" style="max-height: 50vh;">
+                      <table class="table table-sm fs-9 mb-0">
+                        <thead>
+                          <tr>
+                            <th class="align-middle ps-0" style="width:1%">
+                              <div class="form-check mb-0 fs-8"><input class="form-check-input" type="checkbox" id="class-daily-log-select-all"></div>
+                            </th>
+                            <th class="align-middle" style="width:16%">Học sinh</th>
+                            <th class="align-middle" style="width:14%">Giấc ngủ trưa</th>
+                            <th class="align-middle" style="width:12%">Tâm trạng</th>
+                            <th class="align-middle" style="width:12%">Ăn uống</th>
+                            <th class="align-middle" style="width:8%">Vệ sinh</th>
+                            <th class="align-middle">Ghi chú</th>
+                            <th class="align-middle text-end pe-3" style="width:6%"></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @foreach($students as $student)
+                            <tr>
+                              <td class="align-middle ps-0 py-3">
+                                <div class="form-check mb-0 fs-8">
+                                  <input class="form-check-input class-daily-log-row-select" type="checkbox" data-student-id="{{ $student->id }}">
+                                </div>
+                              </td>
+                              <td class="align-middle py-3">
+                                <div class="d-flex align-items-center">
+                                  <div class="avatar avatar-m"><img class="rounded-square" src="{{ $student->thumbnail_path ?? '/assets/admin/trans.png' }}" alt=""></div>
+                                  <p class="mb-0 ms-3 text-body-emphasis fw-bold">{{ $student->name }}</p>
+                                </div>
+                              </td>
+                              <td class="align-middle">
+                                <select class="form-select form-select-sm class-daily-log-input" data-field="nap_quality" data-student-id="{{ $student->id }}">
+                                  <option value="" {{ !$student->daily_log_nap_quality ? 'selected' : '' }}>--</option>
+                                  <option value="good" {{ $student->daily_log_nap_quality == 'good' ? 'selected' : '' }}>Ngủ ngon</option>
+                                  <option value="insufficient" {{ $student->daily_log_nap_quality == 'insufficient' ? 'selected' : '' }}>Ngủ không đủ giấc</option>
+                                  <option value="skipped" {{ $student->daily_log_nap_quality == 'skipped' ? 'selected' : '' }}>Không ngủ trưa</option>
+                                </select>
+                              </td>
+                              <td class="align-middle">
+                                <select class="form-select form-select-sm class-daily-log-input" data-field="mood" data-student-id="{{ $student->id }}">
+                                  <option value="" {{ !$student->daily_log_mood ? 'selected' : '' }}>--</option>
+                                  <option value="vui_ve" {{ $student->daily_log_mood == 'vui_ve' ? 'selected' : '' }}>Vui vẻ</option>
+                                  <option value="binh_thuong" {{ $student->daily_log_mood == 'binh_thuong' ? 'selected' : '' }}>Bình thường</option>
+                                  <option value="quay_khoc" {{ $student->daily_log_mood == 'quay_khoc' ? 'selected' : '' }}>Quấy khóc</option>
+                                  <option value="met_moi" {{ $student->daily_log_mood == 'met_moi' ? 'selected' : '' }}>Mệt mỏi</option>
+                                  <option value="om" {{ $student->daily_log_mood == 'om' ? 'selected' : '' }}>Ốm</option>
+                                </select>
+                              </td>
+                              <td class="align-middle">
+                                <select class="form-select form-select-sm class-daily-log-input" data-field="meal_amount" data-student-id="{{ $student->id }}">
+                                  <option value="" {{ !$student->daily_log_meal_amount ? 'selected' : '' }}>--</option>
+                                  <option value="all" {{ $student->daily_log_meal_amount == 'all' ? 'selected' : '' }}>Ăn hết</option>
+                                  <option value="most" {{ $student->daily_log_meal_amount == 'most' ? 'selected' : '' }}>Ăn phần lớn</option>
+                                  <option value="some" {{ $student->daily_log_meal_amount == 'some' ? 'selected' : '' }}>Ăn ít</option>
+                                  <option value="none" {{ $student->daily_log_meal_amount == 'none' ? 'selected' : '' }}>Không ăn</option>
+                                </select>
+                              </td>
+                              <td class="align-middle">
+                                <input type="number" min="0" value="{{ $student->daily_log_potty_count }}" class="form-control form-control-sm class-daily-log-input" data-field="potty_count" data-student-id="{{ $student->id }}">
+                              </td>
+                              <td class="align-middle">
+                                <input type="text" value="{{ $student->daily_log_notes }}" class="form-control form-control-sm class-daily-log-input" data-field="notes" data-student-id="{{ $student->id }}" placeholder="Ghi chú">
+                              </td>
+                              <td class="align-middle text-end pe-3">
+                                <span class="class-daily-log-row-status fs-10 text-body-tertiary" data-student-id="{{ $student->id }}"></span>
+                              </td>
+                            </tr>
+                          @endforeach
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-phoenix-secondary" data-bs-dismiss="modal">Đóng</button>
+              </div>
+            </div>
+          </div>
+        </div>
 @include('admin.pages.media_browser')
 @endsection
 
 @section('js')
 <script type="text/javascript">
 if (window.GLightbox) {
-    GLightbox({ selector: '.class-post-photo' });
+    GLightbox({ selector: '.class-post-photo, .class-meal-photo' });
 }
 
 var loadingMorePosts = false;
@@ -357,14 +495,13 @@ function maybeLoadMorePosts() {
     $.ajax({
         url: "{{ route('classes.posts.load', $class->id) }}",
         type: 'GET',
-        data: { offset: $feed.data('offset'), last_date: $feed.data('last-date') },
+        data: { offset: $feed.data('offset') },
         success: function (res) {
             $feed.append(res.html);
             $feed.data('offset', res.next_offset);
             $feed.data('has-more', res.has_more ? '1' : '0');
-            $feed.data('last-date', res.last_date);
             if (window.GLightbox) {
-                GLightbox({ selector: '.class-post-photo' });
+                GLightbox({ selector: '.class-post-photo, .class-meal-photo' });
             }
         },
         complete: function () {
@@ -455,7 +592,7 @@ $('#edit_class_post_form').on('submit', function (e) {
             $('#class_post_' + postId).replaceWith(res.html);
             $('#edit_class_post_modal').modal('hide');
             if (window.GLightbox) {
-                GLightbox({ selector: '.class-post-photo' });
+                GLightbox({ selector: '.class-post-photo, .class-meal-photo' });
             }
         },
         error: function (xhr) {
@@ -681,6 +818,132 @@ $('#class_meal_form').on('submit', function (e) {
 
     $('#class_attendance_modal').on('hidden.bs.modal', function () {
         if (attendanceChanged) {
+            window.location.reload();
+        }
+    });
+
+    updateCount();
+})();
+
+(function () {
+    var $board = $('#class-daily-log-board');
+    if (!$board.length) return;
+
+    var updateUrl = $board.data('update-url');
+    var dateValue = $board.data('date');
+    var $errorAlert = $('#class-daily-log-error-alert');
+    var $selectAll = $('#class-daily-log-select-all');
+    var $rowChecks = $board.find('.class-daily-log-row-select');
+    var $countEl = $('#class-daily-log-selected-count');
+    var fields = ['nap_quality', 'mood', 'meal_amount', 'potty_count', 'notes'];
+    var dailyLogChanged = false;
+
+    function selectedIds() {
+        return $rowChecks.filter(':checked').map(function () { return $(this).data('student-id'); }).get();
+    }
+
+    function updateCount() {
+        $countEl.text(selectedIds().length + ' học sinh được chọn');
+    }
+
+    function showError(message) {
+        $errorAlert.text(message).removeClass('d-none');
+    }
+
+    function clearError() {
+        $errorAlert.addClass('d-none').text('');
+    }
+
+    function fieldInput(studentId, field) {
+        return $board.find('.class-daily-log-input[data-field="' + field + '"][data-student-id="' + studentId + '"]');
+    }
+
+    function setRowState(studentId, state) {
+        var $el = $board.find('.class-daily-log-row-status[data-student-id="' + studentId + '"]');
+        if (!$el.length) return;
+        if (state === 'saving') {
+            $el.text('Đang lưu...').attr('class', 'class-daily-log-row-status fs-10 text-body-tertiary');
+        } else if (state === 'saved') {
+            $el.text('Đã lưu').attr('class', 'class-daily-log-row-status fs-10 text-success');
+            setTimeout(function () {
+                if ($el.text() === 'Đã lưu') $el.text('');
+            }, 1500);
+        } else if (state === 'error') {
+            $el.text('Lỗi').attr('class', 'class-daily-log-row-status fs-10 text-danger');
+        }
+    }
+
+    function buildUpdate(studentId) {
+        var update = { student_id: studentId };
+        fields.forEach(function (field) {
+            var $el = fieldInput(studentId, field);
+            var value = $el.length ? $el.val() : '';
+            update[field] = value === '' ? null : value;
+        });
+        return update;
+    }
+
+    function sendUpdates(studentIds) {
+        studentIds.forEach(function (id) { setRowState(id, 'saving'); });
+        clearError();
+
+        $.ajax({
+            url: updateUrl,
+            type: 'POST',
+            data: { _token: '{{ csrf_token() }}', date: dateValue, updates: studentIds.map(buildUpdate) },
+            success: function () {
+                dailyLogChanged = true;
+                studentIds.forEach(function (id) { setRowState(id, 'saved'); });
+            },
+            error: function (xhr) {
+                studentIds.forEach(function (id) { setRowState(id, 'error'); });
+                showError((xhr.responseJSON && xhr.responseJSON.message) || 'Không thể lưu.');
+            }
+        });
+    }
+
+    function saveRow(studentId) {
+        sendUpdates([studentId]);
+    }
+
+    $board.on('change', '.class-daily-log-input', function () {
+        saveRow($(this).data('student-id'));
+    });
+
+    $selectAll.on('change', function () {
+        $rowChecks.prop('checked', $selectAll.is(':checked'));
+        updateCount();
+    });
+
+    $rowChecks.on('change', function () {
+        if (!$(this).is(':checked')) $selectAll.prop('checked', false);
+        updateCount();
+    });
+
+    $('#class-daily-log-bulk-apply').on('click', function () {
+        var ids = selectedIds();
+        if (!ids.length) return;
+
+        var bulkValues = {};
+        fields.forEach(function (field) {
+            var $bulkEl = $('#class-daily-log-bulk-' + field);
+            if ($bulkEl.length && $bulkEl.val() !== '') {
+                bulkValues[field] = $bulkEl.val();
+            }
+        });
+        if (!Object.keys(bulkValues).length) return;
+
+        ids.forEach(function (studentId) {
+            Object.keys(bulkValues).forEach(function (field) {
+                fieldInput(studentId, field).val(bulkValues[field]);
+            });
+        });
+
+        sendUpdates(ids);
+    });
+
+    $('#class_daily_log_modal').on('hidden.bs.modal', function () {
+        if (dailyLogChanged) {
             window.location.reload();
         }
     });
