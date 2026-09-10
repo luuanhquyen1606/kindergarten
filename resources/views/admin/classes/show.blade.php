@@ -36,6 +36,11 @@
                 <div class="col-auto">    
                   <div class="row g-2">
                     <div class="col-auto order-xxl-2"><a class="btn btn-primary lh-1" href="{{ route('attendances.show', $class->id) }}"><span class="fa-solid fa-user-plus me-2"></span>Điểm danh</a></div>
+                    <div class="col-auto order-xxl-2"><button type="button" class="btn btn-phoenix-primary lh-1" data-bs-toggle="modal" data-bs-target="#class_meal_modal"><span class="fa-solid fa-utensils me-2"></span>Thực đơn</button></div>
+                    <div class="col-auto order-xxl-2"><a class="btn btn-phoenix-primary lh-1" href="{{ route('classes.daily_logs', $class->id) }}"><span class="fa-solid fa-notes-medical me-2"></span>Sức khỏe</a></div>
+
+
+                    
                     <div class="col-auto order-xxl-1">
                       <a class="btn btn-phoenix-primary lh-1" href="{{ route('classes.albums', $class->id) }}"><span class="fa-solid fa-images me-2"></span> Album</a>
                     </div>
@@ -94,6 +99,19 @@
                 <div class="col-12 py-2"><a class="btn btn-link px-0 fs-8 text-body-secondary text-primary-hover fw-semibold d-flex" href="#!"><span class="fa-solid fa-circle-question me-2 mb-2 mb-xxl-0"></span>{{ $unmarked_count }} Chưa điểm danh</a></div>
                 @endif
               </div>
+              <div class="d-flex pb-4 align-items-end border-bottom border-translucent border-dashed">
+                <h3 class="flex-1 mb-0">Thực đơn hôm nay</h3>
+              </div>
+              <div class="row g-0 mb-5 mb-lg-0">
+                @foreach($mealTypes as $mealType)
+                  <?php $todayMeal = $todayMeals->get($mealType->id); ?>
+                  <div class="col-12 border-1 border-bottom border-translucent py-2">
+                    <button type="button" class="btn btn-link px-0 fs-8 {{ $todayMeal ? 'text-success' : 'text-body-secondary' }} text-primary-hover fw-semibold d-flex class-meal-type-trigger" data-bs-toggle="modal" data-bs-target="#class_meal_modal" data-meal-type-id="{{ $mealType->id }}">
+                      <span class="fa-solid {{ $todayMeal ? 'fa-circle-check' : 'fa-circle-question' }} me-2 mb-2 mb-xxl-0"></span>{{ $mealType->name }}{{ $todayMeal ? ' - đã cập nhật' : ' - chưa cập nhật' }}
+                    </button>
+                  </div>
+                @endforeach
+              </div>
             </div>
             <div class="col-12 col-xl-8">
               <div class="card mb-4">
@@ -148,7 +166,7 @@
                   </div>
 
 
-                  @include('admin.components.file_picker', ['id' => 'class_post_files', 'name' => 'files', 'label' => 'Thêm file, ảnh cho bài viết'])
+                  @include('admin.components.file_picker', ['id' => 'class_post_files', 'name' => 'files', 'label' => 'Thêm file, ảnh cho bài viết','reopenModal' => 'create_class_post_modal'])
                
                
                 </div>
@@ -178,11 +196,47 @@
                     <div class="invalid-feedback"></div>
                   </div>
 
-                  @include('admin.components.file_picker', ['id' => 'edit_class_post_files', 'name' => 'files', 'label' => 'Thêm file, ảnh cho bài viết'])
+                  @include('admin.components.file_picker', ['id' => 'edit_class_post_files', 'name' => 'files', 'label' => 'Thêm file, ảnh cho bài viết', 'reopenModal' => 'edit_class_post_modal'])
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-phoenix-secondary" data-bs-dismiss="modal">Hủy</button>
                   <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal fade" id="class_meal_modal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+              <form id="class_meal_form">
+                @csrf
+                <div class="modal-header">
+                  <h5 class="modal-title">Cập nhật thực đơn hôm nay</h5>
+                  <button type="button" class="btn btn-close p-1" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div class="mb-3">
+                    <label class="form-label">Bữa ăn</label>
+                    <select class="form-select" name="meal_type_id" id="class_meal_type_select" required>
+                      @foreach($mealTypes as $mealType)
+                        <option value="{{ $mealType->id }}">{{ $mealType->name }}</option>
+                      @endforeach
+                    </select>
+                    <div class="invalid-feedback"></div>
+                  </div>
+                  <div class="form-floating mb-3">
+                    <textarea class="form-control" name="description" id="class_meal_description" style="height: 100px" placeholder="Món ăn"></textarea>
+                    <label for="class_meal_description">Món ăn</label>
+                    <div class="invalid-feedback"></div>
+                  </div>
+
+                  @include('admin.components.file_picker', ['id' => 'class_meal_photo', 'name' => 'photo_id', 'label' => 'Chọn ảnh món ăn', 'multiple' => false, 'reopenModal' => 'class_meal_modal'])
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-phoenix-secondary" data-bs-dismiss="modal">Hủy</button>
+                  <button type="submit" class="btn btn-primary">Lưu</button>
                 </div>
               </form>
             </div>
@@ -334,6 +388,62 @@ $(document).on('click', '.delete-class-post', function (e) {
         data: { _token: '{{ csrf_token() }}', _method: 'DELETE' },
         success: function () {
             $card.remove();
+        }
+    });
+});
+
+var todayMeals = {!! json_encode($todayMeals->map(function ($meal) {
+    return ['description' => $meal->description, 'photo_id' => $meal->photo_id, 'path' => $meal->thumbnail_path];
+})) !!};
+
+function fillClassMealForm(mealTypeId) {
+    var data = todayMeals[mealTypeId];
+    $('#class_meal_description').val(data ? data.description : '');
+    if (data && data.photo_id) {
+        $('#class_meal_photo').trigger('picker:set', [[{ id: data.photo_id, path: data.path }]]);
+    } else {
+        $('#class_meal_photo').trigger('picker:reset');
+    }
+}
+
+$('#class_meal_type_select').on('change', function () {
+    fillClassMealForm($(this).val());
+});
+
+$('.class-meal-type-trigger').on('click', function () {
+    $('#class_meal_type_select').val($(this).data('meal-type-id'));
+});
+
+$('#class_meal_modal').on('show.bs.modal', function (e) {
+    fillClassMealForm($('#class_meal_type_select').val());
+});
+
+$('#class_meal_modal').on('hidden.bs.modal', function () {
+    $('.invalid-feedback').html('');
+    $('#class_meal_form .form-control, #class_meal_form .form-select').removeClass('is-invalid');
+});
+
+$('#class_meal_form').on('submit', function (e) {
+    e.preventDefault();
+    var $form = $(this);
+    $('.invalid-feedback').html('');
+    $form.find('.form-control, .form-select').removeClass('is-invalid');
+
+    $.ajax({
+        url: '{{ route('classes.meals.update', $class->id) }}',
+        type: 'POST',
+        data: $form.serialize(),
+        success: function () {
+            window.location.reload();
+        },
+        error: function (xhr) {
+            if (xhr.status === 422) {
+                var errors = xhr.responseJSON.errors;
+                $.each(errors, function (field, msgs) {
+                    $("[name='" + field + "']").addClass('is-invalid');
+                    $("[name='" + field + "']").siblings('.invalid-feedback').html(msgs[0]);
+                });
+            }
         }
     });
 });

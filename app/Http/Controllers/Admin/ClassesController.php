@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 class ClassesController extends BaseController
 {
     public function index()    
@@ -292,7 +293,21 @@ class ClassesController extends BaseController
         ->limit(6)
         ->get();
 
+        $mealTypes = DB::table('meal_types')->orderBy('sort')->get();
+
+        $todayMeals = DB::table('class_meals')
+        ->leftJoin('files', 'files.id', 'class_meals.photo_id')
+        ->leftJoin('thumbnails', 'thumbnails.file_id', 'files.id')
+        ->select('class_meals.*', 'thumbnails.path as thumbnail_path')
+        ->where('class_meals.class_id', $class->id)
+        ->where('class_meals.meal_date', $today)
+        ->whereNull('class_meals.deleted_at')
+        ->get()
+        ->keyBy('meal_type_id');
+
         $data['class'] = $class;
+        $data['mealTypes'] = $mealTypes;
+        $data['todayMeals'] = $todayMeals;
         $data['students'] = $students;
         $data['posts'] = $posts;
         $data['posts_html'] = $postsHtml;
@@ -767,6 +782,190 @@ class ClassesController extends BaseController
 
         return redirect()->route('classes.show', $id)
                      ->with('success', 'Đã xóa bài viết.');
+    }
+
+    public function updateMeals(Request $request, $id)
+    {
+        $school_id = $this->app['school']->id;
+
+        $class = DB::table('classes')
+        ->where('id', $id)
+        ->where('school_id', $school_id)
+        ->whereNull('deleted_at')
+        ->first();
+
+        if (!$class) {
+            return response()->json(['message' => 'Không có quyền truy cập.'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'meal_type_id' => ['required', 'integer', Rule::exists('meal_types', 'id')],
+            'description' => 'nullable|string',
+            'photo_id' => 'nullable|exists:files,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Dữ liệu không hợp lệ.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        // Teachers can only ever record today's meals — the date is never taken from the request.
+        $date = now()->format('Y-m-d');
+        $mealTypeId = (int) $request->get('meal_type_id');
+
+        $existing = DB::table('class_meals')
+        ->where('class_id', $class->id)
+        ->where('meal_date', $date)
+        ->where('meal_type_id', $mealTypeId)
+        ->first();
+
+        $payload = [
+            'description' => $request->get('description'),
+            'photo_id' => $request->get('photo_id') ?: null,
+            'created_by' => Auth::id(),
+            'updated_at' => now(),
+        ];
+
+        if ($existing) {
+            DB::table('class_meals')->where('id', $existing->id)->update($payload);
+        } else {
+            DB::table('class_meals')->insert(array_merge($payload, [
+                'school_id' => $school_id,
+                'class_id' => $class->id,
+                'meal_date' => $date,
+                'meal_type_id' => $mealTypeId,
+                'created_at' => now(),
+            ]));
+        }
+
+        return response()->json(['status' => 'ok']);
+    }
+
+    public function dailyLogs(Request $request, $id)
+    {
+        $school_id = $this->app['school']->id;
+
+        $class = DB::table('classes')
+        ->where('id', $id)
+        ->where('school_id', $school_id)
+        ->whereNull('deleted_at')
+        ->first();
+
+        if (!$class) {
+            abort(404);
+        }
+
+        $date = $request->get('date', now()->format('Y-m-d'));
+
+        $students = DB::table('class_student')
+        ->join('students', 'students.id', 'class_student.student_id')
+        ->leftJoin('files', 'files.id', 'students.photo_id')
+        ->leftJoin('thumbnails', 'thumbnails.file_id', 'files.id')
+        ->leftJoin('student_daily_logs', function ($join) use ($class, $date) {
+            $join->on('student_daily_logs.student_id', 'students.id')
+                ->where('student_daily_logs.class_id', $class->id)
+                ->where('student_daily_logs.log_date', $date);
+        })
+        ->select('students.id', 'students.name', 'files.id as file_id', 'thumbnails.path as thumbnail_path',
+            'student_daily_logs.nap_start', 'student_daily_logs.nap_end', 'student_daily_logs.mood',
+            'student_daily_logs.meal_amount', 'student_daily_logs.potty_count', 'student_daily_logs.notes')
+        ->where('class_student.class_id', $class->id)
+        ->whereNull('students.deleted_at')
+        ->orderBy('students.name')
+        ->get();
+
+        $data['class'] = $class;
+        $data['date'] = $date;
+        $data['students'] = $students;
+
+        return view('admin.classes.daily_logs', $data);
+    }
+
+    public function updateDailyLogs(Request $request, $id)
+    {
+        $school_id = $this->app['school']->id;
+
+        $class = DB::table('classes')
+        ->where('id', $id)
+        ->where('school_id', $school_id)
+        ->whereNull('deleted_at')
+        ->first();
+
+        if (!$class) {
+            return response()->json(['message' => 'Không có quyền truy cập.'], 403);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'date' => 'required|date',
+            'updates' => 'required|array|min:1',
+            'updates.*.student_id' => 'required|integer',
+            'updates.*.nap_start' => 'nullable|date_format:H:i',
+            'updates.*.nap_end' => 'nullable|date_format:H:i',
+            'updates.*.mood' => 'nullable|string|max:30',
+            'updates.*.meal_amount' => ['nullable', Rule::in(['none', 'some', 'most', 'all'])],
+            'updates.*.potty_count' => 'nullable|integer|min:0',
+            'updates.*.notes' => 'nullable|string|max:256',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Dữ liệu không hợp lệ.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $date = $request->get('date');
+
+        $studentIds = DB::table('class_student')
+        ->where('class_id', $class->id)
+        ->pluck('student_id');
+
+        $saved = [];
+        foreach ($request->get('updates') as $update) {
+            $studentId = (int) $update['student_id'];
+            if (!$studentIds->contains($studentId)) {
+                continue;
+            }
+
+            $this->saveDailyLog($class, $school_id, $date, $studentId, $update);
+            $saved[] = $studentId;
+        }
+
+        return response()->json(['status' => 'ok', 'saved' => $saved]);
+    }
+
+    private function saveDailyLog($class, $school_id, $date, $studentId, $update)
+    {
+        $payload = [
+            'nap_start' => $update['nap_start'] ?? null,
+            'nap_end' => $update['nap_end'] ?? null,
+            'mood' => $update['mood'] ?? null,
+            'meal_amount' => $update['meal_amount'] ?? null,
+            'potty_count' => $update['potty_count'] ?? null,
+            'notes' => $update['notes'] ?? null,
+            'created_by' => Auth::id(),
+            'updated_at' => now(),
+        ];
+
+        $existing = DB::table('student_daily_logs')
+        ->where('class_id', $class->id)
+        ->where('student_id', $studentId)
+        ->where('log_date', $date)
+        ->first();
+
+        if ($existing) {
+            DB::table('student_daily_logs')->where('id', $existing->id)->update($payload);
+        } else {
+            DB::table('student_daily_logs')->insert(array_merge($payload, [
+                'school_id' => $school_id,
+                'class_id' => $class->id,
+                'student_id' => $studentId,
+                'log_date' => $date,
+                'created_at' => now(),
+            ]));
+        }
     }
 
     public function destroy($id){

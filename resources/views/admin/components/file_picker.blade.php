@@ -1,9 +1,10 @@
-@php
+﻿@php
     $id = $id ?? 'file_picker_' . uniqid();
     $name = $name ?? 'files';
     $label = $label ?? 'Chọn file';
     $multiple = $multiple ?? true;
     $initial = $initial ?? [];
+    $reopenModal = $reopenModal ?? null;
 @endphp
 
 <style>
@@ -214,18 +215,17 @@
     // Bootstrap doesn't support one modal shown on top of another: opening this one from
     // inside another already-shown modal leaves that other modal hidden/broken behind it.
     // Remember whichever modal was open when this one was triggered, and explicitly bring
-    // it back once this one closes.
+    // it back once this one closes. `reopenModal` lets a caller pin the exact modal to
+    // reopen instead of relying on auto-detecting whatever happens to be visible.
+    var reopenModalId = {!! json_encode($reopenModal) !!};
     var $modalToRestore = null;
 
     $modal.on('show.bs.modal', function () {
         loadFiles(1);
-        $modalToRestore = $('.modal.show').not(this);
+        $modalToRestore = reopenModalId ? $('#' + reopenModalId) : $('.modal.show').not(this);
     });
 
     $modal.on('hidden.bs.modal', function () {
-        
-        $('#edit_class_post_modal').modal('show');
-        /*
         if (!$modalToRestore || !$modalToRestore.length) return;
         bootstrap.Modal.getOrCreateInstance($modalToRestore[0]).show();
         // The call above is a no-op if that modal still thinks it's shown internally
@@ -233,12 +233,6 @@
         $modalToRestore.addClass('show').css('display', 'block').attr('aria-modal', 'true').removeAttr('aria-hidden');
         $('body').addClass('modal-open');
         $modalToRestore = null;
-*/
-        
-
-
-
-        
     });
 
     $root.on('picker:reset', function () {

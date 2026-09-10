@@ -49,6 +49,9 @@ Route::middleware([
     Route::get('/admin/classes/{class}/posts/{post}/edit', [ClassesController::class, 'editPost'])->whereNumber(['class', 'post'])->name('classes.posts.edit');
     Route::put('/admin/classes/{class}/posts/{post}', [ClassesController::class, 'updatePost'])->whereNumber(['class', 'post'])->name('classes.posts.update');
     Route::delete('/admin/classes/{class}/posts/{post}', [ClassesController::class, 'destroyPost'])->whereNumber(['class', 'post'])->name('classes.posts.destroy');
+    Route::post('/admin/classes/{class}/meals', [ClassesController::class, 'updateMeals'])->whereNumber('class')->name('classes.meals.update');
+    Route::get('/admin/classes/{class}/daily-logs', [ClassesController::class, 'dailyLogs'])->whereNumber('class')->name('classes.daily_logs');
+    Route::post('/admin/classes/{class}/daily-logs/update', [ClassesController::class, 'updateDailyLogs'])->whereNumber('class')->name('classes.daily_logs.update');
     Route::get('/admin/attendance', [AttendancesController::class, 'index'])->name('attendances.index');
     Route::get('/admin/attendance/{class_id}', [AttendancesController::class, 'show'])->whereNumber('class_id')->name('attendances.show');
     Route::post('/admin/attendance/{class_id}/update', [AttendancesController::class, 'update'])->whereNumber('class_id')->name('attendances.update');
