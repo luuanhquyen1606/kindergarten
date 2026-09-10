@@ -11,13 +11,13 @@ class TagsController extends BaseController
     { 
          $classes = DB::table('classes')
         ->leftJoin('files','files.id','classes.photo_id')
-        ->leftJoin('thumbnails','thumbnails.file_id','files.id')
-        ->select('classes.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path')
+        ->select('classes.*', 'files.id as file_id')
         ->where('classes.school_id', $this->app['school']->id)
         ->whereNull('classes.deleted_at')
         ->orderBy('classes.created_at', 'desc')
-        ->get(); 
-        $data['classes']=$classes;  
+        ->get();
+        $classes->each(fn($class) => $class->thumbnail_path = getThumbnailUrl($class->file_id));
+        $data['classes']=$classes;
         return view('admin.classes.index',$data); 
     }  
     public function show($id)
@@ -32,22 +32,22 @@ class TagsController extends BaseController
     public function edit($id){
         $class = DB::table('classes')
         ->leftJoin('files','files.id','classes.photo_id')
-        ->leftJoin('thumbnails','thumbnails.file_id','files.id')
-        ->select('classes.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path')
+        ->select('classes.*', 'files.id as file_id')
         ->where('classes.school_id', $this->app['school']->id)
         ->where('classes.id', $id)
-        ->first(); 
-       
-        $data['class']=$class; 
+        ->first();
+        if ($class) $class->thumbnail_path = getThumbnailUrl($class->file_id);
+
+        $data['class']=$class;
 
        $programs = DB::table('programs')
         ->leftJoin('files','files.id','programs.photo_id')
-        ->leftJoin('thumbnails','thumbnails.file_id','files.id')
-        ->select('programs.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path')
+        ->select('programs.*', 'files.id as file_id')
         ->where('programs.school_id', $this->app['school']->id)
         ->whereNull('programs.deleted_at')
         ->get();
-        $data['programs']=$programs; 
+        $programs->each(fn($program) => $program->thumbnail_path = getThumbnailUrl($program->file_id));
+        $data['programs']=$programs;
         $teachers = DB::table('users')
         ->where('school_id', $this->app['school']->id)
         ->get();
@@ -82,12 +82,12 @@ class TagsController extends BaseController
     {
          $programs = DB::table('programs')
         ->leftJoin('files','files.id','programs.photo_id')
-        ->leftJoin('thumbnails','thumbnails.file_id','files.id')
-        ->select('programs.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path')
+        ->select('programs.*', 'files.id as file_id')
         ->where('programs.school_id', $this->app['school']->id)
         ->whereNull('programs.deleted_at')
         ->get();
-        $data['programs']=$programs; 
+        $programs->each(fn($program) => $program->thumbnail_path = getThumbnailUrl($program->file_id));
+        $data['programs']=$programs;
 
 
         $teachers = DB::table('users')

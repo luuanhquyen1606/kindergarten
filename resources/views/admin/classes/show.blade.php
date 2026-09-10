@@ -73,7 +73,7 @@
                 </div>
                 <div class="row g-3"> 
                   @forelse($recent_photos as $photo)
-                  <div class="col-4"><a href="{{ $photo->path }}" class="class-post-photo" data-gallery="gallery-photos"><img class="w-100 rounded-3" style="aspect-ratio: 1 / 1; object-fit: cover;" src="<?php echo getPhotoThumbnail($photo->id, 500); ?>" alt=""></a></div>
+                  <div class="col-4"><a href="{{ $photo->path }}" class="class-post-photo" data-gallery="gallery-photos"><img class="w-100 rounded-3" style="aspect-ratio: 1 / 1; object-fit: cover;" src="<?php echo getThumbnailUrl($photo->id, 500); ?>" alt=""></a></div>
                   @empty
                   <div class="col-12 text-body-tertiary fs-9">Chưa có ảnh nào.</div>
                   @endforelse
@@ -415,6 +415,12 @@ $('.class-meal-type-trigger').on('click', function () {
 });
 
 $('#class_meal_modal').on('show.bs.modal', function (e) {
+    // e.relatedTarget is only set when a real trigger element (the "Thực đơn" button or a
+    // meal-type link) opened this modal. When the photo picker's own modal closes and this
+    // one is brought back on top of it, it's reopened programmatically with no relatedTarget -
+    // skip refilling the form then, or it would overwrite the photo the user just picked with
+    // whatever was last saved on the server.
+    if (!e.relatedTarget) return;
     fillClassMealForm($('#class_meal_type_select').val());
 });
 

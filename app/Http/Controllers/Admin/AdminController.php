@@ -155,14 +155,12 @@ class AdminController extends BaseController
 
     private function buildRecentStudents($school_id)
     {
-        return DB::table('students as s')
-            ->leftJoin('files', 'files.id', 's.photo_id')
-            ->leftJoin('thumbnails', 'thumbnails.file_id', 'files.id')
+        $students = DB::table('students as s')
             ->where('s.school_id', $school_id)
             ->whereNull('s.deleted_at')
             ->orderBy('s.created_at', 'desc')
             ->select(
-                's.id', 's.name', 's.created_at', 'thumbnails.path as thumbnail_path',
+                's.id', 's.name', 's.created_at', 's.photo_id',
                 DB::raw('(SELECT classes.name FROM class_student
                             INNER JOIN classes ON classes.id = class_student.class_id
                             WHERE class_student.student_id = s.id
@@ -170,6 +168,8 @@ class AdminController extends BaseController
             )
             ->limit(5)
             ->get();
+        $students->each(fn($student) => $student->thumbnail_path = getThumbnailUrl($student->photo_id));
+        return $students;
     }
 
     private function buildUpcomingBirthdays($school_id, Carbon $today)

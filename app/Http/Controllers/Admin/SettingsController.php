@@ -134,15 +134,14 @@ class SettingsController extends BaseController
  
 
         $teacher = DB::table('users')
-        ->leftJoin('files','files.id','users.photo_id')
-        ->leftJoin('thumbnails','thumbnails.file_id','files.id')
-        ->select('users.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path')
+        ->select('users.*')
         ->where('users.school_id', $this->app['school']->id)
         ->whereNull('users.deleted_at')
         ->orderBy('users.created_at', 'desc')
         ->where('users.id', $id)
-        ->first();  
-        $data['teacher']=$teacher; 
+        ->first();
+        if ($teacher) $teacher->thumbnail_path = getThumbnailUrl($teacher->photo_id);
+        $data['teacher']=$teacher;
         return view('admin.teachers.edit',$data);
     }
     public function update($id,Request $request){

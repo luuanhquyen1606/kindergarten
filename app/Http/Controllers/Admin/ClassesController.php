@@ -12,15 +12,14 @@ class ClassesController extends BaseController
     public function index()    
     { 
          $classes = DB::table('classes')
-        ->leftJoin('files','files.id','classes.photo_id')
-        ->leftJoin('thumbnails','thumbnails.file_id','files.id')
         ->leftJoin('programs','programs.id','classes.program_id')
         ->leftJoin('campuses','campuses.id','classes.campus_id')
-        ->select('classes.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path', 'programs.name as program_name', 'campuses.name as campus_name')
+        ->select('classes.*', 'programs.name as program_name', 'campuses.name as campus_name')
         ->where('classes.school_id', $this->app['school']->id)
         ->whereNull('classes.deleted_at')
         ->orderBy('classes.created_at', 'desc')
-        ->get(); 
+        ->get();
+        $classes->each(fn($class) => $class->thumbnail_path = getThumbnailUrl($class->photo_id));
         $data['classes']=$classes;
         return view('admin.classes.index',$data);
     }
@@ -230,12 +229,10 @@ class ClassesController extends BaseController
         $school_id = $this->app['school']->id;
 
         $class = DB::table('classes')
-        ->leftJoin('files', 'files.id', 'classes.photo_id')
-        ->leftJoin('thumbnails', 'thumbnails.file_id', 'files.id')
         ->leftJoin('programs', 'programs.id', 'classes.program_id')
         ->leftJoin('users', 'users.id', 'classes.teacher_id')
         ->leftJoin('campuses', 'campuses.id', 'classes.campus_id')
-        ->select('classes.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path',
+        ->select('classes.*',
             'programs.name as program_name', 'users.name as teacher_name', 'users.photo_id as teacher_photo_id', 'campuses.name as campus_name')
         ->where('classes.school_id', $school_id)
         ->where('classes.id', $id)
@@ -245,13 +242,12 @@ class ClassesController extends BaseController
         if (!$class) {
             abort(404);
         }
+        $class->thumbnail_path = getThumbnailUrl($class->photo_id);
 
         $today = now()->format('Y-m-d');
 
         $students = DB::table('class_student')
         ->join('students', 'students.id', 'class_student.student_id')
-        ->leftJoin('files', 'files.id', 'students.photo_id')
-        ->leftJoin('thumbnails', 'thumbnails.file_id', 'files.id')
         ->leftJoin('parents as father', 'father.id', 'students.father_id')
         ->leftJoin('parents as mother', 'mother.id', 'students.mother_id')
         ->leftJoin('student_attendances', function ($join) use ($class, $today) {
@@ -259,8 +255,7 @@ class ClassesController extends BaseController
                 ->where('student_attendances.class_id', $class->id)
                 ->where('student_attendances.date', $today);
         })
-        ->select('students.id', 'students.name', 'students.gender', 'students.birthdate',
-            'files.id as file_id', 'thumbnails.path as thumbnail_path',
+        ->select('students.id', 'students.name', 'students.gender', 'students.birthdate', 'students.photo_id',
             'father.name as father_name', 'father.phone as father_phone',
             'mother.name as mother_name', 'mother.phone as mother_phone',
             'student_attendances.status as attendance_status',
@@ -271,6 +266,7 @@ class ClassesController extends BaseController
         ->whereNull('students.deleted_at')
         ->orderBy('students.name')
         ->get();
+        $students->each(fn($student) => $student->thumbnail_path = getThumbnailUrl($student->photo_id));
 
         $postsPerPage = 1;
         $posts = $this->getClassPosts($class->id, $school_id, 0, $postsPerPage + 1);
@@ -296,13 +292,14 @@ class ClassesController extends BaseController
         $mealTypes = DB::table('meal_types')->orderBy('sort')->get();
 
         $todayMeals = DB::table('class_meals')
-        ->leftJoin('files', 'files.id', 'class_meals.photo_id')
-        ->leftJoin('thumbnails', 'thumbnails.file_id', 'files.id')
-        ->select('class_meals.*', 'thumbnails.path as thumbnail_path')
         ->where('class_meals.class_id', $class->id)
         ->where('class_meals.meal_date', $today)
         ->whereNull('class_meals.deleted_at')
         ->get()
+        ->map(function ($meal) {
+            $meal->thumbnail_path = getThumbnailUrl($meal->photo_id);
+            return $meal;
+        })
         ->keyBy('meal_type_id');
 
         $data['class'] = $class;
@@ -429,22 +426,20 @@ class ClassesController extends BaseController
 
     public function edit($id){
         $class = DB::table('classes')
-        ->leftJoin('files','files.id','classes.photo_id')
-        ->leftJoin('thumbnails','thumbnails.file_id','files.id')
-        ->select('classes.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path')
+        ->select('classes.*')
         ->where('classes.school_id', $this->app['school']->id)
         ->where('classes.id', $id)
-        ->first(); 
-       
-        $data['class']=$class; 
+        ->first();
+        if ($class) $class->thumbnail_path = getThumbnailUrl($class->photo_id);
+
+        $data['class']=$class;
 
        $programs = DB::table('programs')
-        ->leftJoin('files','files.id','programs.photo_id')
-        ->leftJoin('thumbnails','thumbnails.file_id','files.id')
-        ->select('programs.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path')
+        ->select('programs.*')
         ->where('programs.school_id', $this->app['school']->id)
         ->whereNull('programs.deleted_at')
         ->get();
+        $programs->each(fn($program) => $program->thumbnail_path = getThumbnailUrl($program->photo_id));
         $data['programs']=$programs;
         $teachers = DB::table('users')
         ->where('school_id', $this->app['school']->id)
@@ -483,13 +478,12 @@ class ClassesController extends BaseController
     public function create()
     {
          $programs = DB::table('programs')
-        ->leftJoin('files','files.id','programs.photo_id')
-        ->leftJoin('thumbnails','thumbnails.file_id','files.id')
-        ->select('programs.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path')
+        ->select('programs.*')
         ->where('programs.school_id', $this->app['school']->id)
         ->whereNull('programs.deleted_at')
         ->get();
-        $data['programs']=$programs; 
+        $programs->each(fn($program) => $program->thumbnail_path = getThumbnailUrl($program->photo_id));
+        $data['programs']=$programs;
 
 
         $teachers = DB::table('users')
@@ -861,20 +855,19 @@ class ClassesController extends BaseController
 
         $students = DB::table('class_student')
         ->join('students', 'students.id', 'class_student.student_id')
-        ->leftJoin('files', 'files.id', 'students.photo_id')
-        ->leftJoin('thumbnails', 'thumbnails.file_id', 'files.id')
         ->leftJoin('student_daily_logs', function ($join) use ($class, $date) {
             $join->on('student_daily_logs.student_id', 'students.id')
                 ->where('student_daily_logs.class_id', $class->id)
                 ->where('student_daily_logs.log_date', $date);
         })
-        ->select('students.id', 'students.name', 'files.id as file_id', 'thumbnails.path as thumbnail_path',
+        ->select('students.id', 'students.name', 'students.photo_id',
             'student_daily_logs.nap_start', 'student_daily_logs.nap_end', 'student_daily_logs.mood',
             'student_daily_logs.meal_amount', 'student_daily_logs.potty_count', 'student_daily_logs.notes')
         ->where('class_student.class_id', $class->id)
         ->whereNull('students.deleted_at')
         ->orderBy('students.name')
         ->get();
+        $students->each(fn($student) => $student->thumbnail_path = getThumbnailUrl($student->photo_id));
 
         $data['class'] = $class;
         $data['date'] = $date;

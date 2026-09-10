@@ -100,14 +100,13 @@ class HomeController extends BaseController
         if($block->code=='programs')
         {
             $programs = DB::table('programs')
-        ->leftJoin('files','files.id','programs.photo_id')
-        ->leftJoin('thumbnails','thumbnails.file_id','files.id')
-        ->select('programs.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path')
+        ->select('programs.*')
         ->where('programs.school_id', $this->app['school']->id)
         ->whereNull('programs.deleted_at')
         ->orderBy('programs.created_at', 'desc')
-        ->get();        
-            $data['programs']=$programs;  
+        ->get();
+            $programs->each(fn($program) => $program->thumbnail_path = getThumbnailUrl($program->photo_id));
+            $data['programs']=$programs;
            
         }
         if($block->code=='teachers')
@@ -509,11 +508,11 @@ class HomeController extends BaseController
         $this->attachEventMeta($event);
 
        $files = DB::table('files')
-       ->join('thumbnails', 'thumbnails.file_id',  'files.id')
         ->join('post_files', 'files.id', '=', 'post_files.file_id')
         ->where('post_files.post_id', $event->id)
-        ->select('files.*', 'thumbnails.path as thumbnail_path')
+        ->select('files.*')
         ->get();
+        $files->each(fn($file) => $file->thumbnail_path = getThumbnailUrl($file->id));
 
         $data['files']=$files;
         $data['event']=$event;
@@ -531,11 +530,11 @@ class HomeController extends BaseController
         $this->attachEventMeta($event);
 
        $files = DB::table('files')
-       ->join('thumbnails', 'thumbnails.file_id',  'files.id')
         ->join('post_files', 'files.id', '=', 'post_files.file_id')
         ->where('post_files.post_id', $event->id)
-        ->select('files.*', 'thumbnails.path as thumbnail_path')
+        ->select('files.*')
         ->get();
+        $files->each(fn($file) => $file->thumbnail_path = getThumbnailUrl($file->id));
 
         $students = DB::table('students')
         ->join('files', 'students.photo_id',  'files.id')
@@ -566,11 +565,11 @@ class HomeController extends BaseController
         $this->attachEventMeta($event);
 
        $files = DB::table('files')
-       ->join('thumbnails', 'thumbnails.file_id',  'files.id')
         ->join('post_files', 'files.id', '=', 'post_files.file_id')
         ->where('post_files.post_id', $event->id)
-        ->select('files.*', 'thumbnails.path as thumbnail_path')
+        ->select('files.*')
         ->get();
+        $files->each(fn($file) => $file->thumbnail_path = getThumbnailUrl($file->id));
 
 
 
@@ -600,9 +599,7 @@ class HomeController extends BaseController
         ->where('categories.school_id', $this->app['school']->id)
         ->get();
 
-        $posts = DB::table('posts')
-        ->leftJoin('files', 'files.id', '=', 'posts.photo_id')
-        ->leftJoin('thumbnails', 'thumbnails.file_id', '=', 'files.id');
+        $posts = DB::table('posts');
             if(request()->get('danh-muc'))
             {
                 $category = DB::table('categories')
@@ -616,9 +613,10 @@ class HomeController extends BaseController
         $posts->where('posts.type', 'news');
         $posts->where('posts.is_published', 1);
         $posts->whereNull('posts.deleted_at');
-        $posts=$posts->select('posts.*',"thumbnails.path as thumbnail_path")
+        $posts=$posts->select('posts.*')
         ->orderBy('created_at','desc')
         ->paginate(10);
+        $posts->getCollection()->each(fn($post) => $post->thumbnail_path = getThumbnailUrl($post->photo_id));
 
 
         $data['posts']=$posts;
@@ -628,13 +626,13 @@ class HomeController extends BaseController
     public function events()
     {
        $posts = DB::table('posts')
-        ->join('files', 'files.id', '=', 'posts.photo_id')
-        ->join('thumbnails', 'thumbnails.file_id', '=', 'files.id')
+        ->whereNotNull('posts.photo_id')
         ->where('posts.type', 'event')
         ->where('posts.is_published', 1)
         ->whereNull('posts.deleted_at')
-        ->select('posts.*',"thumbnails.path as thumbnail_path")
+        ->select('posts.*')
         ->paginate(10);
+        $posts->getCollection()->each(fn($post) => $post->thumbnail_path = getThumbnailUrl($post->photo_id));
 
         foreach ($posts as $post) {
             $this->attachEventMeta($post);

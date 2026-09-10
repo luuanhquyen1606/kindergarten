@@ -1,9 +1,11 @@
 <?php
-if (! function_exists('getPhotoThumbnail')) {
-    function getPhotoThumbnail($id,$size=1024){
-        $file = $post = DB::table('files')
-        ->where('id', $id) 
+if (! function_exists('getThumbnailUrl')) {
+    function getThumbnailUrl($id,$size=1024){
+        if (!$id) return null;
+        $file = DB::table('files')
+        ->where('id', $id)
         ->first();
+        if (!$file) return null;
         $filepath = $file->path;
        
         $thumb='';

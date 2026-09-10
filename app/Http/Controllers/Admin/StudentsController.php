@@ -15,11 +15,9 @@ class StudentsController extends BaseController
     public function index()
     {
          $students = DB::table('students')
-        ->leftJoin('files','files.id','students.photo_id')
-        ->leftJoin('thumbnails','thumbnails.file_id','files.id')
         ->leftJoin('parents as father','father.id','students.father_id')
         ->leftJoin('parents as mother','mother.id','students.mother_id')
-        ->select('students.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path',
+        ->select('students.*',
             'father.name as father_name', 'father.phone as father_phone',
             'mother.name as mother_name', 'mother.phone as mother_phone',
             DB::raw('(SELECT classes.name FROM class_student
@@ -42,6 +40,7 @@ class StudentsController extends BaseController
         ->whereNull('students.deleted_at')
         ->orderBy('students.created_at', 'desc')
         ->get();
+        $students->each(fn($student) => $student->thumbnail_path = getThumbnailUrl($student->photo_id));
         $data['students']=$students;
 
         $data['classes'] = DB::table('classes')
@@ -598,15 +597,11 @@ class StudentsController extends BaseController
 
     private function findStudentWithRelations($id)
     {
-        return DB::table('students')
-        ->leftJoin('files','files.id','students.photo_id')
-        ->leftJoin('thumbnails','thumbnails.file_id','files.id')
+        $student = DB::table('students')
         ->leftJoin('parents as father','father.id','students.father_id')
         ->leftJoin('parents as mother','mother.id','students.mother_id')
         ->select(
             'students.*',
-            'files.id as file_id',
-            'thumbnails.path as thumbnail_path',
             'father.name as father_name','father.phone as father_phone','father.email as father_email',
             'mother.name as mother_name','mother.phone as mother_phone','mother.email as mother_email',
             DB::raw('(SELECT class_student.class_id FROM class_student
@@ -620,6 +615,8 @@ class StudentsController extends BaseController
         ->where('students.school_id', $this->app['school']->id)
         ->where('students.id', $id)
         ->first();
+        if ($student) $student->thumbnail_path = getThumbnailUrl($student->photo_id);
+        return $student;
     }
 
     /**

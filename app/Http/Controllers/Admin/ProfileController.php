@@ -135,12 +135,12 @@ class ProfileController extends BaseController
 
     private function currentUser()
     {
-        return DB::table('users')
-            ->leftJoin('files', 'files.id', 'users.photo_id')
-            ->leftJoin('thumbnails', 'thumbnails.file_id', 'files.id')
-            ->select('users.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path')
+        $user = DB::table('users')
+            ->select('users.*')
             ->where('users.id', Auth::user()->id)
             ->whereNull('users.deleted_at')
             ->first();
+        if ($user) $user->thumbnail_path = getThumbnailUrl($user->photo_id);
+        return $user;
     }
 }

@@ -38,18 +38,18 @@ class AttendancesController extends BaseController
         $students = DB::table('class_student')
         ->join('students', 'students.id', 'class_student.student_id')
         ->leftJoin('files', 'files.id', 'students.photo_id')
-        ->leftJoin('thumbnails', 'thumbnails.file_id', 'files.id')
         ->leftJoin('student_attendances', function ($join) use ($class, $date) {
             $join->on('student_attendances.student_id', 'students.id')
                 ->where('student_attendances.class_id', $class->id)
                 ->where('student_attendances.date', $date);
         })
-        ->select('students.id', 'students.name', 'files.id as file_id', 'thumbnails.path as thumbnail_path',
+        ->select('students.id', 'students.name', 'files.id as file_id',
             'student_attendances.status', 'student_attendances.note')
         ->where('class_student.class_id', $class->id)
         ->whereNull('students.deleted_at')
         ->orderBy('students.name')
         ->get();
+        $students->each(fn($student) => $student->thumbnail_path = getThumbnailUrl($student->file_id));
 
         $data['class'] = $class;
         $data['date'] = $date;

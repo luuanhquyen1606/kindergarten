@@ -13,27 +13,25 @@ class TeachersController extends BaseController
     public function index()    
     {  
          $teachers = DB::table('users')
-        ->leftJoin('files','files.id','users.photo_id')
-        ->leftJoin('thumbnails','thumbnails.file_id','files.id')
-        ->select('users.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path')
+        ->select('users.*')
         ->where('users.school_id', $this->app['school']->id)
         ->whereNull('users.deleted_at')
         ->orderBy('users.created_at', 'desc')
-        ->get(); 
-        $data['teachers']=$teachers; 
+        ->get();
+        $teachers->each(fn($teacher) => $teacher->thumbnail_path = getThumbnailUrl($teacher->photo_id));
+        $data['teachers']=$teachers;
         return view('admin.teachers.index',$data); 
     }  
     public function show($id)
     {
          $teacher = DB::table('users')
-        ->leftJoin('files','files.id','users.photo_id')
-        ->leftJoin('thumbnails','thumbnails.file_id','files.id')
         ->leftJoin('campuses','campuses.id','users.campus_id')
-        ->select('users.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path', 'campuses.name as campus_name')
+        ->select('users.*', 'campuses.name as campus_name')
         ->where('users.school_id', $this->app['school']->id)
         ->whereNull('users.deleted_at')
         ->where('users.id', $id)
         ->first();
+        if ($teacher) $teacher->thumbnail_path = getThumbnailUrl($teacher->photo_id);
         $data['teacher']=$teacher;
 
         $rows = DB::table('users_permissions as up')
@@ -99,14 +97,13 @@ class TeachersController extends BaseController
 
 
         $teacher = DB::table('users')
-        ->leftJoin('files','files.id','users.photo_id')
-        ->leftJoin('thumbnails','thumbnails.file_id','files.id')
-        ->select('users.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path')
+        ->select('users.*')
         ->where('users.school_id', $this->app['school']->id)
         ->whereNull('users.deleted_at')
         ->orderBy('users.created_at', 'desc')
         ->where('users.id', $id)
         ->first();
+        if ($teacher) $teacher->thumbnail_path = getThumbnailUrl($teacher->photo_id);
         $data['teacher']=$teacher;
 
         $campuses = DB::table('campuses')

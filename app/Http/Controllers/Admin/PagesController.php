@@ -111,39 +111,35 @@ class PagesController extends BaseController
 
 
         $programs = DB::table('programs')
-        ->leftJoin('files','files.id','programs.photo_id')
-        ->leftJoin('thumbnails','thumbnails.file_id','files.id')
-        ->select('programs.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path')
+        ->select('programs.*')
         ->where('programs.school_id', $this->app['school']->id)
         ->whereNull('programs.deleted_at')
         ->orderBy('programs.created_at', 'desc')
-        ->get(); 
+        ->get();
+        $programs->each(fn($program) => $program->thumbnail_path = getThumbnailUrl($program->photo_id));
         $data['programs']=$programs;
-        
+
         $testimonials = DB::table('testimonials')
           ->where('testimonials.school_id', $this->app['school']->id)
         ->orderBy('testimonials.created_at', 'desc')
-        ->get(); 
+        ->get();
         $data['testimonials']=$testimonials;
 
         $teachers = DB::table('users')
-        ->leftJoin('files','files.id','users.photo_id')
-        ->leftJoin('thumbnails','thumbnails.file_id','files.id')
-        ->select('users.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path')
+        ->select('users.*')
         ->where('users.school_id', $this->app['school']->id)
         ->whereNull('users.deleted_at')
         ->orderBy('users.created_at', 'desc')
-        ->get(); 
-        $data['teachers']=$teachers; 
+        ->get();
+        $teachers->each(fn($teacher) => $teacher->thumbnail_path = getThumbnailUrl($teacher->photo_id));
+        $data['teachers']=$teachers;
         $posts = DB::table('posts')
-         ->leftJoin('files','files.id','posts.photo_id')
-         ->leftJoin('thumbnails','thumbnails.file_id','files.id')
-         ->select('posts.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path')
+        ->select('posts.*')
         ->where('posts.school_id', $this->app['school']->id)
         ->whereNull('posts.deleted_at')
         ->orderBy('posts.created_at', 'desc')
         ->get();
-     
+        $posts->each(fn($post) => $post->thumbnail_path = getThumbnailUrl($post->photo_id));
         $data['posts']=$posts;
         $parents = DB::table('navigations')
         ->whereNull('parent_id')

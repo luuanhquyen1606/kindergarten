@@ -50,14 +50,12 @@ class MediasController extends BaseController
     }
     public function edit($id){
         $post = DB::table('posts')
-         ->leftJoin('files','files.id','posts.photo_id')
-         ->leftJoin('thumbnails','thumbnails.file_id','files.id')
-         ->select('posts.*', 'files.id as file_id', 'thumbnails.path as thumbnail_path')
-
+         ->select('posts.*')
         ->where('posts.school_id', $this->app['school']->id)
         ->where('posts.id', $id)
         ->orderBy('posts.created_at', 'desc')
         ->first();
+        $post->thumbnail_path = getThumbnailUrl($post->photo_id);
 
         $post->tags = DB::table('tags')
                     ->whereIn('id', function ($query) use ($post) {
@@ -66,12 +64,12 @@ class MediasController extends BaseController
                         })->get();
        
         $files = DB::table('files')
-       ->join('thumbnails', 'thumbnails.file_id',  'files.id')
         ->join('post_files', 'files.id', '=', 'post_files.file_id')
         ->where('post_files.post_id', $id)
-        ->select('files.*', 'thumbnails.path as thumbnail_path')
+        ->select('files.*')
         ->get();
-        
+        $files->each(fn($file) => $file->thumbnail_path = getThumbnailUrl($file->id));
+
         $data['files']=$files;
 
         $data['post']=$post;  

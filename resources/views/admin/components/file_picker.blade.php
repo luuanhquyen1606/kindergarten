@@ -227,9 +227,15 @@
 
     $modal.on('hidden.bs.modal', function () {
         if (!$modalToRestore || !$modalToRestore.length) return;
-        bootstrap.Modal.getOrCreateInstance($modalToRestore[0]).show();
-        // The call above is a no-op if that modal still thinks it's shown internally
-        // (its state was never told it was hidden) - restore its visible state directly too.
+        // That modal was never really hidden - it stayed shown (and its own _isShown
+        // state stayed true) the whole time this one was open on top of it, just visually
+        // covered by this one's backdrop. Only call Bootstrap's show() when it's genuinely
+        // not shown; calling it while it already has .show can re-fire show.bs.modal on it
+        // and re-run whatever that page bound there (e.g. re-populating the form from
+        // stored data), clobbering what the user just picked here.
+        if (!$modalToRestore.hasClass('show')) {
+            bootstrap.Modal.getOrCreateInstance($modalToRestore[0]).show();
+        }
         $modalToRestore.addClass('show').css('display', 'block').attr('aria-modal', 'true').removeAttr('aria-hidden');
         $('body').addClass('modal-open');
         $modalToRestore = null;

@@ -18,7 +18,7 @@
           <div class="photo-stack">
             @foreach($stackPhotos as $index => $photo)
             <div class="rounded-2 overflow-hidden photo-stack-{{ $index === 0 ? 'top' : ($index === 1 ? 'middle' : 'bottom') }}">
-              <img class="w-100 object-fit-cover" src="<?php echo getPhotoThumbnail($photo->id, 500); ?>" alt="">
+              <img class="w-100 object-fit-cover" src="<?php echo getThumbnailUrl($photo->id, 500); ?>" alt="">
             </div>
             @endforeach
           </div>

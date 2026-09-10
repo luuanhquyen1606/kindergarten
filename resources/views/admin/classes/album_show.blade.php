@@ -29,8 +29,8 @@
     <div class="row gx-7 gy-5 overflow-hidden" id="image_gallery" data-gallery-column="data-gallery-column" data-sl-isotope='{"layoutMode":"packery"}'>
       @forelse($album->photos as $photo)
       <div class="col-sm-6 col-md-4 col-xl-3 isotope-item img-zoom-hover">
-        <a class="text-decoration-none class-album-photo" href="<?php echo getPhotoThumbnail($photo->id, 1200); ?>" data-gallery="album-{{ $album->id }}">
-          <div class="overflow-hidden rounded"><img class="img-fluid" src="<?php echo getPhotoThumbnail($photo->id, 500); ?>" alt="" /></div>
+        <a class="text-decoration-none class-album-photo" href="<?php echo getThumbnailUrl($photo->id, 1200); ?>" data-gallery="album-{{ $album->id }}">
+          <div class="overflow-hidden rounded"><img class="img-fluid" src="<?php echo getThumbnailUrl($photo->id, 500); ?>" alt="" /></div>
         </a>
         <div class="d-flex align-items-center mt-3">
           <div class="flex-1 text-truncate">
