@@ -46,7 +46,7 @@
             <?php for ($i=0; $i<$per_page;$i++) {
               ?> 
               
-                    <a style="cursor: pointer;" href=""   data-gallery="gallery-class"  class="files col-6 col-sm-6 col-md-4 col-xl-2 hidden " id="file_{{$i}}"  >
+                    <a style="cursor: pointer;" href="" class="files col-6 col-sm-6 col-md-4 col-xl-2 hidden " id="file_{{$i}}"  >
                         
                         <div class="hoverbox img-zoom-hover rounded-2">
                             <img  srcset="" style="aspect-ratio:1 / 1;object-fit: cover;" class="src img-fluid" src="" alt="" />
@@ -116,6 +116,10 @@ $('.copy_btn').on('click', function() {
 
 var uploadedFiles = [];
 
+// One instance, reused for the life of the page - reload() picks up hrefs
+// that change after AJAX pagination/upload without rebinding click handlers.
+var mediaLightbox = GLightbox({ selector: '.files' });
+
 // Pause any other playing video when one starts - bound once, not per file/render.
 $(document).on('play', '.video', function() {
     $('.video').not(this).each(function() {
@@ -178,13 +182,9 @@ $.ajax({
             $file.find('img').attr('src', file.thumbnailUrl);
             $file.find('.name').text(file.original_name);
             $file.attr('href', file.thumbnailUrl);
-            //
-            //data-gallery="gallery-class"
-
             $file.removeClass("hidden");
-
-            
         });
+        mediaLightbox.reload();
         buildPagination(response.files);
     },
     error: function(xhr, status, error) {
