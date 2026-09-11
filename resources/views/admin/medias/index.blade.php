@@ -128,7 +128,6 @@ $('.copy_btn').on('click', function() {
         });
 });
 
-var uploadedFiles = [];
 var currentPage = 1;
 
 // One instance, reused for the life of the page - reload() picks up hrefs
@@ -171,37 +170,28 @@ $('#feature_file_browser').on('change', function() {
     var files = this.files;
     if (files.length === 0) return;
 
-    uploadedFiles = [];
-    for (let i = 0; i < files.length; i++) {
-        uploadSingleFile(files[i], function(response) {
-            uploadDone(files.length, i);
-        });
-    }
+    var uploads = Array.from(files).map(uploadSingleFile);
+
+    // allSettled (not all) so one failed file in the batch can't stop the
+    // rest from showing up - reload once every upload has finished either way.
+    Promise.allSettled(uploads).then(function() {
+        loadFiles(1);
+    });
 
     // allow re-selecting the same file(s) again
     this.value = '';
 });
 
-function uploadDone(all, uploaded) {
-    uploadedFiles.push(uploaded);
-    if (all == uploadedFiles.length) {
-        loadFiles(1);
-    }
-}
-
-function uploadSingleFile(file, callback) {
+function uploadSingleFile(file) {
     let formData = new FormData();
     formData.append('file', file);
 
-    $.ajax({
+    return $.ajax({
         url: '/admin/upload',
         type: 'POST',
         data: formData,
         contentType: false,
-        processData: false,
-        success: function(response) {
-            callback(response);
-        }
+        processData: false
     });
 }
 
@@ -211,6 +201,7 @@ $.ajax({
     url: '/admin/medias?page='+page,
     type: 'GET',
     dataType: 'json',
+    cache: false,
     success: function(response) {
         let files = response.files.data;
 
