@@ -20,6 +20,19 @@
     padding: 0;
 }
 
+.delete-media-btn{
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity .15s ease-in-out;
+}
+.hoverbox:hover .delete-media-btn,
+.hoverbox:focus-within .delete-media-btn{
+    opacity: 1;
+}
+
 </style>
 
 <div class="mb-9">
@@ -53,6 +66,7 @@
                             <div class="hoverbox-content flex-center flex-column">
                             <h4  class="name text-white"></h4>
                             </div>
+                            <button type="button" class="delete-media-btn btn btn-sm btn-outline-danger" data-id="" title="Delete"><span class="fas fa-trash"></span></button>
                         </div>
                     </a>
 
@@ -115,10 +129,36 @@ $('.copy_btn').on('click', function() {
 });
 
 var uploadedFiles = [];
+var currentPage = 1;
 
 // One instance, reused for the life of the page - reload() picks up hrefs
 // that change after AJAX pagination/upload without rebinding click handlers.
 var mediaLightbox = GLightbox({ selector: '.files' });
+
+// Bound once on the static (per-slot) buttons rather than delegated through
+// document, so stopPropagation() below actually runs before the click bubbles
+// up to the parent .files anchor and reaches GLightbox's own listener on it.
+$('.delete-media-btn').on('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!confirm('Delete this file?')) return;
+
+    var id = $(this).attr('data-id');
+    if (!id) return;
+
+    $.ajax({
+        url: '{{ url('/admin/medias') }}/' + id,
+        type: 'POST',
+        data: { _token: '{{ csrf_token() }}', _method: 'DELETE' },
+        success: function() {
+            loadFiles(currentPage);
+        },
+        error: function() {
+            alert('Could not delete this file.');
+        }
+    });
+});
 
 // Pause any other playing video when one starts - bound once, not per file/render.
 $(document).on('play', '.video', function() {
@@ -172,19 +212,28 @@ $.ajax({
     type: 'GET',
     dataType: 'json',
     success: function(response) {
-        $('.files').addClass("hidden");
         let files = response.files.data;
+
+        // Deleting the last item on the last page can leave this page empty
+        // once re-paginated - fall back to the previous page instead of
+        // rendering a blank grid.
+        if (files.length === 0 && page > 1) {
+            loadFiles(page - 1);
+            return;
+        }
+
+        $('.files').addClass("hidden");
         $.each(files, function(index, file) {
             let $file = $('#file_'+index);
-            let $offcanvas = $('#offcanvas_'+index);
-            let fileUrl = "{{ url('/') }}"+file.path;
-            
+
             $file.find('img').attr('src', file.thumbnailUrl);
             $file.find('.name').text(file.original_name);
+            $file.find('.delete-media-btn').attr('data-id', file.id);
             $file.attr('href', file.thumbnailUrl);
             $file.removeClass("hidden");
         });
         mediaLightbox.reload();
+        currentPage = response.files.current_page;
         buildPagination(response.files);
     },
     error: function(xhr, status, error) {

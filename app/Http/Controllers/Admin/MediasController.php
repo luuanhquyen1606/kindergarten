@@ -13,9 +13,11 @@ class MediasController extends BaseController
     public function index(Request $request)    
     {  
 
-        $per_page=48;       
+        $per_page=48;
          $posts = DB::table('files')
-        ->where('files.school_id', $this->app['school']->id)->orderBy('id', 'desc')->paginate($per_page)->through(function ($item) {
+        ->where('files.school_id', $this->app['school']->id)
+        ->whereNull('files.deleted_at')
+        ->orderBy('id', 'desc')->paginate($per_page)->through(function ($item) {
             $item->srcset = getImageSet($item->thumbnail);
             $item->thumbnailUrl = getThumbnailUrl($item->id,350);
             return $item; 
@@ -259,13 +261,18 @@ class MediasController extends BaseController
                      ->with('success', 'Post created!');
     }
 
-    public function destroy($id){
-        DB::table('posts')
+    public function destroy($id, Request $request){
+        DB::table('files')
         ->where('id', $id)
         ->where('school_id', $this->app['school']->id)
         ->update(['deleted_at' => now()]);
-            return redirect()->route('posts.index')
-                            ->with('success', 'Post deleted successfully.');
+
+        if ($request->ajax()) {
+            return response()->json(['status' => 'ok']);
+        }
+
+        return redirect()->route('medias.index')
+                        ->with('success', 'File deleted successfully.');
     }
 }
 
