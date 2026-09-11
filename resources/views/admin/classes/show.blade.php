@@ -17,10 +17,11 @@
 
 @if($classTeachers->isNotEmpty())
 @foreach($classTeachers as $teacher)
-              <div class=" feed-profile" style="width: 150px; height: 150px">
-                <div class="rounded-circle d-flex flex-center z-1" ></div>
-                <div class="position-relative bg-body-quaternary rounded-circle d-flex flex-center mb-xxl-7">
-                  <div class="avatar avatar-5xl"><img class="rounded-circle rounded-circle img-thumbnail shadow-sm border-0" src="{{ getPhotoUrl($teacher->photo_id) }}" alt=""></div>
+              <div class="hoverbox feed-profile" style="width: 150px; height: 150px">
+                <div class="hoverbox-content rounded-circle d-flex flex-center z-1" style="--phoenix-bg-opacity: .56; color: white; padding-top:20px"><a href="#!">{{$teacher->name}}</a></div>
+                <div class="position-relative bg-body-quaternary rounded-circle cursor-pointer d-flex flex-center mb-xxl-7">
+                  <div class="avatar avatar-5xl"><img class="rounded-circle rounded-circle img-thumbnail shadow-sm border-0" src="<?php echo ($teacher->photo_id) ? getPhotoUrl($teacher->photo_id) : '/assets/admin/img/generic/profile.png'; ?>" alt=""></div>
+                  <a href="/admin/teachers/{{ $teacher->id }}" class="w-100 h-100 position-absolute z-1" for="upload-porfile-picture"></a>
                 </div>
               </div>
 @endforeach

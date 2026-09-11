@@ -564,6 +564,7 @@ class ClassesController extends BaseController
         $data['programs']=$programs;
         $teachers = DB::table('users')
         ->where('school_id', $this->app['school']->id)
+        ->whereNull('deleted_at')
         ->get();
         $data['teachers']=$teachers;
 
@@ -615,6 +616,7 @@ class ClassesController extends BaseController
 
         $teachers = DB::table('users')
         ->where('school_id', $this->app['school']->id)
+        ->whereNull('deleted_at')
         ->get();
         $data['teachers']=$teachers;
 
@@ -636,9 +638,9 @@ class ClassesController extends BaseController
         'campus_id' => 'nullable|exists:campuses,id',
         'year' => 'required','integer','min:' . (now()->year - 5),'max:' . (now()->year + 5),
         'tuition' => 'required|numeric|min:0',
-        'teacher_id' => 'required',
+        'teacher_id' => ['required', Rule::exists('users', 'id')->whereNull('deleted_at')],
         'assistant_teacher_ids' => 'nullable|array',
-        'assistant_teacher_ids.*' => 'integer|exists:users,id',
+        'assistant_teacher_ids.*' => ['integer', Rule::exists('users', 'id')->whereNull('deleted_at')],
         ]);
 
         if ($validator->fails()) {
