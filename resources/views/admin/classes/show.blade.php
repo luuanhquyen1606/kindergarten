@@ -523,8 +523,8 @@ $('#photo_id').on('change', function () {
 
 
 $('#create_class_post_modal').on('hidden.bs.modal', function () {
-    $('#create_class_post_form')[0].reset();
-    $('#class_post_files').trigger('picker:reset');
+    //$('#create_class_post_form')[0].reset();
+    //$('#class_post_files').trigger('picker:reset'); 
     $('.invalid-feedback').html('');
     $('#create_class_post_form .form-control').removeClass('is-invalid');
 });

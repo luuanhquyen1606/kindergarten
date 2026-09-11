@@ -47,7 +47,10 @@
       <div class="fs-9">
         <span class="fw-bold text-warning-emphasis">Lưu ý:</span>
         @foreach($attention as $row)
-        <span class="d-block">{{ $row->name }} &mdash; {{ implode(', ', $row->attention_reasons) }}</span>
+        <div class="d-flex align-items-center mt-1">
+          <img src="{{ $row->thumbnail_path ?? '/assets/admin/trans.png' }}" class="rounded-circle me-2" style="width:20px;height:20px;object-fit:cover;flex-shrink:0;" alt="{{ $row->name }}">
+          <span><a href="{{ route('students.show', $row->id) }}" class="fw-semibold">{{ $row->name }}</a> &mdash; {{ implode(', ', $row->attention_reasons) }}</span>
+        </div>
         @endforeach
       </div>
     </div>
