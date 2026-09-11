@@ -17,6 +17,7 @@ class MediasController extends BaseController
          $posts = DB::table('files')
         ->where('files.school_id', $this->app['school']->id)->orderBy('id', 'desc')->paginate($per_page)->through(function ($item) {
             $item->srcset = getImageSet($item->thumbnail);
+            $item->thumbnailUrl = getThumbnailUrl($item->id,350);
             return $item; 
         });     
           

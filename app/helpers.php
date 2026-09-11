@@ -2,6 +2,7 @@
 if (! function_exists('getThumbnailUrl')) {
     function getThumbnailUrl($id,$size=1024){
         if (!$id) return null;
+        
         $file = DB::table('files')
         ->where('id', $id)
         ->first();
@@ -11,13 +12,17 @@ if (! function_exists('getThumbnailUrl')) {
         $thumb='';
         if(strpos($file->mime_type,'image') !== false)
             {
+              
             $setpath=addPostfix($filepath,"_".$size);
-            $setpath = preg_replace('/\.[^.]+$/', '.webp', $setpath);
+            $setpath = preg_replace('/\.[^.]+$/', '.jpg', $setpath);
+            $setpath = "/thumbnails/".$id."_".$size.".jpg";   
+         //   echo $setpath;die();  
             if(file_exists( public_path().$setpath))
                 {
                     $thumb = $setpath;
                 }
                 else{
+                    
                     resizeImageByWidth($filepath,$setpath,$size,99);
                     $thumb = $setpath;
                 }
@@ -25,7 +30,7 @@ if (! function_exists('getThumbnailUrl')) {
         if(strpos($file->mime_type,'video') !== false)
             {
             $setpath=addPostfix($filepath,"_".$size);
-            $setpath = preg_replace('/\.[^.]+$/', '.webp', $setpath);
+            $setpath = preg_replace('/\.[^.]+$/', '.jpg', $setpath);
             if(file_exists( public_path().$setpath))
                 {
                     $thumb = $setpath;
@@ -184,7 +189,7 @@ if (!function_exists('getImageSet')) {
     else{
     foreach ($sizes as $size){
         $setpath=addPostfix($filepath,"_thumb_99_".$size);
-        $setpath = preg_replace('/\.[^.]+$/', '.webp', $setpath);
+        $setpath = preg_replace('/\.[^.]+$/', '.jpg', $setpath);
        
      
         if(file_exists('/var/www/kindergarten/public/'.$setpath))

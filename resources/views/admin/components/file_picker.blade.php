@@ -128,8 +128,8 @@
             clone(gridTemplate)
                 .attr('data-id', file.id)
                 .toggleClass('selected', isSelected(file.id))
-                .find('img').attr('src', file.path).end()
-                .find('.name').text(file.original_name).end()
+                .find('img').attr('src', file.thumbnailUrl).end()
+                .find('.name').text(file.original_name).end() 
                 .appendTo($grid);
         });
     }
