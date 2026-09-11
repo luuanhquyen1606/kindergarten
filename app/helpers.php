@@ -65,6 +65,29 @@ if (! function_exists('postPreviewCode')) {
         return md5('kidoo_post_preview_'.$postId);
     }
 }
+if (! function_exists('teacherClassIds')) {
+    /**
+     * IDs of every class a teacher can manage: classes where they're the
+     * homeroom teacher (classes.teacher_id) plus classes they're assigned to
+     * via the class_teacher pivot (as lead or assistant).
+     */
+    function teacherClassIds($school_id, $teacherId){
+        $leadIds = DB::table('classes')
+        ->where('school_id', $school_id)
+        ->where('teacher_id', $teacherId)
+        ->whereNull('deleted_at')
+        ->pluck('id');
+
+        $assignedIds = DB::table('class_teacher')
+        ->join('classes', 'classes.id', 'class_teacher.class_id')
+        ->where('classes.school_id', $school_id)
+        ->where('class_teacher.teacher_id', $teacherId)
+        ->whereNull('classes.deleted_at')
+        ->pluck('classes.id');
+
+        return $leadIds->concat($assignedIds)->unique()->values();
+    }
+}
 
 function getSlug($title,$entity,$entity_id,$school_id){
     $slug = Str::slug($title);

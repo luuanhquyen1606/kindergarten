@@ -55,7 +55,7 @@ class TeachersController extends BaseController
         $classes = DB::table('classes')
         ->leftJoin('programs', 'programs.id', 'classes.program_id')
         ->select('classes.*', 'programs.name as program_name')
-        ->where('classes.teacher_id', $id)
+        ->whereIn('classes.id', teacherClassIds($this->app['school']->id, $id))
         ->where('classes.school_id', $this->app['school']->id)
         ->whereNull('classes.deleted_at')
         ->orderBy('classes.name')

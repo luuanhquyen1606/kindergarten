@@ -16,7 +16,7 @@ class AttendancesController extends BaseController
     {
         $classes = DB::table('classes')
         ->where('school_id', $this->app['school']->id)
-        ->where('teacher_id', Auth::id())
+        ->whereIn('id', teacherClassIds($this->app['school']->id, Auth::id()))
         ->whereNull('deleted_at')
         ->orderBy('name')
         ->get();
@@ -135,7 +135,7 @@ class AttendancesController extends BaseController
         return DB::table('classes')
         ->where('id', $class_id)
         ->where('school_id', $this->app['school']->id)
-        ->where('teacher_id', Auth::id())
+        ->whereIn('id', teacherClassIds($this->app['school']->id, Auth::id()))
         ->whereNull('deleted_at')
         ->first();
     }

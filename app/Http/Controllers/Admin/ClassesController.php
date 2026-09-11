@@ -244,6 +244,15 @@ class ClassesController extends BaseController
         }
         $class->thumbnail_path = getThumbnailUrl($class->photo_id);
 
+        $classTeachers = DB::table('class_teacher')
+        ->join('users', 'users.id', 'class_teacher.teacher_id')
+        ->where('class_teacher.class_id', $class->id)
+        ->select('users.id', 'users.name', 'users.photo_id', 'class_teacher.role')
+        ->get()
+        ->sortBy(fn($teacher) => $teacher->role === 'lead' ? 0 : 1)
+        ->values();
+        $classTeachers->each(fn($teacher) => $teacher->thumbnail_path = getThumbnailUrl($teacher->photo_id));
+
         $today = now()->format('Y-m-d');
 
         $students = DB::table('class_student')
@@ -313,6 +322,7 @@ class ClassesController extends BaseController
         ->keyBy('meal_type_id');
 
         $data['class'] = $class;
+        $data['classTeachers'] = $classTeachers;
         $data['mealTypes'] = $mealTypes;
         $data['todayMeals'] = $todayMeals;
         $data['students'] = $students;
@@ -557,6 +567,11 @@ class ClassesController extends BaseController
         ->get();
         $data['teachers']=$teachers;
 
+        $data['assistantTeacherIds'] = DB::table('class_teacher')
+        ->where('class_id', $id)
+        ->where('role', 'assistant')
+        ->pluck('teacher_id');
+
         $campuses = DB::table('campuses')
         ->where('school_id', $this->app['school']->id)
         ->whereNull('deleted_at')
@@ -582,6 +597,7 @@ class ClassesController extends BaseController
         'updated_at' => now(),
         ]);
 
+        $this->syncClassTeachers($id, $request->get('teacher_id'), $request->get('assistant_teacher_ids', []));
 
         return redirect()->route('classes.show', $id)
                      ->with('success', 'Post updated!');
@@ -620,7 +636,9 @@ class ClassesController extends BaseController
         'campus_id' => 'nullable|exists:campuses,id',
         'year' => 'required','integer','min:' . (now()->year - 5),'max:' . (now()->year + 5),
         'tuition' => 'required|numeric|min:0',
-        'teacher_id' => 'required'
+        'teacher_id' => 'required',
+        'assistant_teacher_ids' => 'nullable|array',
+        'assistant_teacher_ids.*' => 'integer|exists:users,id',
         ]);
 
         if ($validator->fails()) {
@@ -642,9 +660,32 @@ class ClassesController extends BaseController
         'created_at' => now(),
         'updated_at' => now(),
     ]);
-    
+
+    $this->syncClassTeachers($post_id, $request->get('teacher_id'), $request->get('assistant_teacher_ids', []));
+
      return redirect()->route('classes.show', $post_id)
                      ->with('success', 'Post created!');
+    }
+
+    private function syncClassTeachers($classId, $leadTeacherId, array $assistantTeacherIds)
+    {
+        DB::table('class_teacher')->where('class_id', $classId)->delete();
+
+        $rows = [];
+        if ($leadTeacherId) {
+            $rows[] = ['class_id' => $classId, 'teacher_id' => $leadTeacherId, 'role' => 'lead'];
+        }
+
+        foreach (array_unique($assistantTeacherIds) as $teacherId) {
+            if ($teacherId == $leadTeacherId) {
+                continue;
+            }
+            $rows[] = ['class_id' => $classId, 'teacher_id' => $teacherId, 'role' => 'assistant'];
+        }
+
+        if (!empty($rows)) {
+            DB::table('class_teacher')->insert($rows);
+        }
     }
 
     public function updatePhoto(Request $request, $id)

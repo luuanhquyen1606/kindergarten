@@ -14,12 +14,20 @@
                 <div class="hover-actions end-0 bottom-0 pe-1 pb-2 text-white"><span class="fa-solid fa-camera me-2 overlay-icon"></span></div>
                 <!--/.bg-holder-->
               </div>
+
+@if($classTeachers->isNotEmpty())
+@foreach($classTeachers as $teacher)
               <div class=" feed-profile" style="width: 150px; height: 150px">
                 <div class="rounded-circle d-flex flex-center z-1" ></div>
                 <div class="position-relative bg-body-quaternary rounded-circle d-flex flex-center mb-xxl-7">
-                  <div class="avatar avatar-5xl"><img class="rounded-circle rounded-circle img-thumbnail shadow-sm border-0" src="{{ getPhotoUrl($class->teacher_photo_id) }}" alt=""></div>
+                  <div class="avatar avatar-5xl"><img class="rounded-circle rounded-circle img-thumbnail shadow-sm border-0" src="{{ getPhotoUrl($teacher->photo_id) }}" alt=""></div>
                 </div>
               </div>
+@endforeach
+              
+@endif
+
+
             </div>
             <div class="card-body">
               <div class="row justify-content-xl-between">
@@ -27,6 +35,7 @@
                   <div class="d-flex flex-wrap mb-3 align-items-center">
                     <h2 class="me-2">{{ $class->name }}</h2><span class="fw-semibold fs-7 text-body-emphasis">{{ $class->year }}</span>
                   </div>
+                 
                   <div class="mb-5">
                     <div class="d-md-flex align-items-center">
                       <div class="d-flex align-items-center"><span class="fa-solid fa-user-group fs-9 text-body-tertiary me-2 me-lg-1 me-xl-2"></span><a class="text-body-emphasis" href="#!"><span class="fs-7 fw-bold text-body-tertiary text-opacity-85 text-body-emphasis-hover">{{ $students->count() }} <span class="fw-semibold ms-1 me-4">học sinh</span></span></a></div>

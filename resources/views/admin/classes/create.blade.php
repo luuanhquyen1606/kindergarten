@@ -87,11 +87,26 @@
                     ?>
                   </select>
                   <label for="floatingSelectTeam">Chủ nhiệm </label>
-                  <div class="invalid-feedback"></div> 
+                  <div class="invalid-feedback"></div>
                 </div>
               </div>
 
-             
+              <div class="col-sm-12 col-md-12" style="margin-bottom: 10px;">
+                <label for="assistantTeacherIds" class="form-label">Giáo viên phụ trách thêm</label>
+                <select name="assistant_teacher_ids[]" class="form-select" id="assistantTeacherIds" multiple size="5">
+                  <?php
+                  foreach ($teachers as $teacher)
+                  {
+                  ?>
+                  <option value="<?php echo $teacher->id;?>"><?php echo $teacher->name; ?></option>
+                  <?php
+                  }
+                  ?>
+                </select>
+                <div class="invalid-feedback"></div>
+              </div>
+
+
 
 
 

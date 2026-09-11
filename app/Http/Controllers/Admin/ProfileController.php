@@ -23,7 +23,7 @@ class ProfileController extends BaseController
                 'c.*', 'p.name as program_name',
                 DB::raw('(SELECT COUNT(*) FROM class_student WHERE class_student.class_id = c.id) as student_count')
             )
-            ->where('c.teacher_id', $user->id)
+            ->whereIn('c.id', teacherClassIds($this->app['school']->id, $user->id))
             ->where('c.school_id', $this->app['school']->id)
             ->whereNull('c.deleted_at')
             ->orderBy('c.name')
