@@ -3,7 +3,6 @@
     <div class="d-flex align-items-center mb-2">
       <span class="fa-solid fa-calendar-day me-2 text-body-tertiary"></span>
       <h6 class="mb-0 fw-bold text-body-emphasis flex-1">{{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}</h6>
-      <a class="fs-9 fw-semibold" href="{{ route('attendances.show', ['class_id' => $class_id, 'date' => $date]) }}">Chi tiết điểm danh</a>
     </div>
     <div class="d-flex flex-wrap column-gap-4 row-gap-1 fs-9 text-body-tertiary">
       @if($counts['present'] > 0)
