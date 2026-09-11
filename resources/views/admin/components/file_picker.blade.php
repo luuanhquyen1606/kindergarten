@@ -192,7 +192,7 @@
         $grid.find('.files[data-id="' + id + '"]').removeClass('selected');
     });
 
-    $root.find('#{{ $id }}_upload_input').on('change', function () {
+    $modal.find('#{{ $id }}_upload_input').on('change', function () {
         var $input = $(this);
         if (!multiple) {
             selected = [];

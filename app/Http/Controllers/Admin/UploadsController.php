@@ -70,19 +70,13 @@ class UploadsController extends BaseController
                 $thumbnailPath=public_path().$thumbnailRelativePath;
 
                 $command = "ffmpeg -i $videoPath -ss 00:00:01 -vframes 1 $thumbnailPath";
-                exec($command, $output, $status);  
+                exec($command, $output, $status);
 
-                
                 DB::table('files')
                 ->where('id', $file_id)
                 ->update([
                         'thumbnail' => $thumbnailRelativePath,
                 ]);
-                echo $command."<br />";
-                print_r($status);  
-                print_r($output);die();  
-                
-
             }
             $file = DB::table('files') 
             ->where('id', $file_id) 
